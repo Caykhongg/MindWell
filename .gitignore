@@ -1,0 +1,7 @@
+node_modules/
+backend/mindwell.db
+backend/mindwell.db-shm
+backend/mindwell.db-wal
+*.log
+.DS_Store
+Thumbs.db

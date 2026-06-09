@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindWell · Hỗ trợ Sức khỏe Tâm thần Sinh viên</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/agent.css">
+</head>
+<body>
+
+  <!-- ============ NAVBAR ============ -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="#" class="nav-logo">
+        <span class="logo-icon"><i class="fas fa-brain"></i></span>
+        <span class="logo-text">MindWell</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#services" class="nav-link">Dịch vụ</a></li>
+        <li><a href="#posts" class="nav-link">Cộng đồng</a></li>
+        <li><a href="#test" class="nav-link">Kiểm tra</a></li>
+        <li><a href="#appointments" class="nav-link">Lịch hẹn</a></li>
+        <li><a href="#chat" class="nav-link">Trò chuyện</a></li>
+      </ul>
+      <div class="nav-auth" id="navAuth">
+        <button class="btn btn-sm btn-outline" id="loginBtn">Đăng nhập</button>
+        <button class="btn btn-sm btn-primary" id="registerBtn">Đăng ký</button>
+      </div>
+      <div class="nav-user hidden" id="navUser">
+        <span class="nav-user-name" id="navUserName"></span>
+        <button class="btn btn-sm btn-outline" id="logoutBtn">Thoát</button>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="container hero-content">
+      <span class="hero-badge">Dịch vụ Y tế Sinh viên</span>
+      <h1 class="hero-title">Tâm trí bạn<br>Quan trọng ở đây</h1>
+      <p class="hero-subtitle">
+        Hỗ trợ sức khỏe tâm thần miễn phí, bảo mật cho mọi sinh viên.<br>
+        Bạn không bao giờ đơn độc.
+      </p>
+      <div class="hero-actions">
+        <a href="#services" class="btn btn-primary">Khám phá dịch vụ</a>
+        <a href="#chat" class="btn btn-outline">Trò chuyện ngay</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES (4 cards) ============ -->
+  <section class="services" id="services">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Dịch vụ của chúng tôi</span>
+        <h2 class="section-title">Chọn hình thức hỗ trợ phù hợp với bạn</h2>
+        <p class="section-desc">Mọi dịch vụ đều bảo mật, miễn phí và dành riêng cho sinh viên.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card" data-section="counseling">
+          <div class="card-icon" style="background:#E3F0FF;">
+            <i class="fas fa-hand-holding-heart" style="color:#4A6FA5;"></i>
+          </div>
+          <h3 class="card-title">Tư vấn Cá nhân</h3>
+          <p class="card-desc">Các buổi gặp riêng với chuyên gia tâm lý. Nói về lo âu, trầm cảm, căng thẳng hay bất cứ điều gì bạn đang nghĩ tới.</p>
+          <span class="card-cta">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></span>
+        </div>
+        <div class="service-card" data-section="group">
+          <div class="card-icon" style="background:#E8F5E9;">
+            <i class="fas fa-users" style="color:#6B9C7B;"></i>
+          </div>
+          <h3 class="card-title">Trị liệu Nhóm</h3>
+          <p class="card-desc">Kết nối với các bạn cùng trang lứa. Nhóm an toàn, có điều phối viên để cùng chữa lành và phát triển.</p>
+          <span class="card-cta">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></span>
+        </div>
+        <div class="service-card" data-section="mindfulness">
+          <div class="card-icon" style="background:#FFF3E0;">
+            <i class="fas fa-spa" style="color:#E8A87C;"></i>
+          </div>
+          <h3 class="card-title">Chánh niệm &amp; Thiền</h3>
+          <p class="card-desc">Các buổi hướng dẫn, bài tập thở và tài liệu thiền giúp bạn giữ bình tĩnh và tập trung.</p>
+          <span class="card-cta">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></span>
+        </div>
+        <div class="service-card" data-section="crisis">
+          <div class="card-icon" style="background:#FCE4EC;">
+            <i class="fas fa-phone-alt" style="color:#E57373;"></i>
+          </div>
+          <h3 class="card-title">Hỗ trợ Khẩn cấp</h3>
+          <p class="card-desc">Trợ giúp ngay lập tức khi bạn cần nhất. Đường dây nóng 24/7, tư vấn khẩn cấp và điều phối chăm sóc.</p>
+          <span class="card-cta">Tìm hiểu thêm <i class="fas fa-arrow-right"></i></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DETAIL SECTIONS ============ -->
+
+  <!-- Tư vấn Cá nhân -->
+  <section class="detail-section" id="counseling">
+    <div class="container">
+      <div class="detail-grid">
+        <div class="detail-content">
+          <span class="section-badge">Tư vấn Cá nhân</span>
+          <h2 class="section-title">Bạn xứng đáng có một không gian để được lắng nghe</h2>
+          <p class="section-desc">Các chuyên gia tâm lý có chứng chỉ của chúng tôi sẵn sàng giúp bạn vượt qua lo âu, trầm cảm, áp lực học tập, khó khăn trong mối quan hệ và nhiều hơn nữa. Mọi buổi tư vấn đều hoàn toàn bảo mật.</p>
+          <ul class="detail-list">
+            <li><i class="fas fa-check-circle"></i> Các buổi hàng tuần miễn phí cho mọi sinh viên</li>
+            <li><i class="fas fa-check-circle"></i> Có cả hình thức trực tiếp và trực tuyến</li>
+            <li><i class="fas fa-check-circle"></i> Chăm sóc thân thiện với cộng đồng LGBTQ+</li>
+            <li><i class="fas fa-check-circle"></i> Không cần chờ đợi cho buổi tư vấn đầu tiên</li>
+          </ul>
+          <a href="#chat" class="btn btn-primary">Đặt lịch tư vấn</a>
+        </div>
+        <div class="detail-visual">
+          <div class="visual-card">
+            <i class="fas fa-comments"></i>
+            <strong>Hỗ trợ 1-1</strong>
+            <span>Buổi 50 phút</span>
+          </div>
+          <div class="visual-card">
+            <i class="fas fa-shield-alt"></i>
+            <strong>Bảo mật 100%</strong>
+            <span>Được pháp luật bảo vệ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trị liệu Nhóm -->
+  <section class="detail-section" id="group">
+    <div class="container">
+      <div class="detail-grid reverse">
+        <div class="detail-content">
+          <span class="section-badge">Trị liệu Nhóm</span>
+          <h2 class="section-title">Chữa lành cùng nhau</h2>
+          <p class="section-desc">Các buổi nhóm có điều phối viên tập hợp những sinh viên có trải nghiệm tương tự. Chia sẻ, lắng nghe và phát triển trong một cộng đồng an toàn, hỗ trợ.</p>
+          <ul class="detail-list">
+            <li><i class="fas fa-check-circle"></i> Các buổi nhóm hàng tuần có điều phối viên</li>
+            <li><i class="fas fa-check-circle"></i> 6–10 người tham gia mỗi nhóm</li>
+            <li><i class="fas fa-check-circle"></i> Chủ đề: lo âu, mất mát, bản sắc, căng thẳng</li>
+            <li><i class="fas fa-check-circle"></i> Nhóm mới bắt đầu mỗi tháng</li>
+          </ul>
+          <a href="#chat" class="btn btn-primary">Tham gia nhóm</a>
+        </div>
+        <div class="detail-visual">
+          <div class="visual-card">
+            <i class="fas fa-circle-nodes"></i>
+            <strong>Kết nối đồng trang lứa</strong>
+            <span>Chia sẻ trải nghiệm</span>
+          </div>
+          <div class="visual-card">
+            <i class="fas fa-handshake"></i>
+            <strong>An toàn &amp; Có điều phối</strong>
+            <span>Điều phối viên chuyên nghiệp</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chánh niệm & Thiền -->
+  <section class="detail-section" id="mindfulness">
+    <div class="container">
+      <div class="detail-grid">
+        <div class="detail-content">
+          <span class="section-badge">Chánh niệm &amp; Thiền</span>
+          <h2 class="section-title">Tìm sự bình yên giữa bộn bề</h2>
+          <p class="section-desc">Xây dựng thói quen hàng ngày với các bài thiền có hướng dẫn, kỹ thuật thở và bài tập chánh niệm được thiết kế cho lịch trình sinh viên bận rộn.</p>
+          <ul class="detail-list">
+            <li><i class="fas fa-check-circle"></i> Các buổi hướng dẫn 5, 10 &amp; 20 phút</li>
+            <li><i class="fas fa-check-circle"></i> Bài tập thở giảm căng thẳng</li>
+            <li><i class="fas fa-check-circle"></i> Câu chuyện ru ngủ &amp; quét cơ thể</li>
+            <li><i class="fas fa-check-circle"></i> Theo dõi chuỗi ngày tập &amp; tiến bộ</li>
+          </ul>
+          <a href="#chat" class="btn btn-primary">Bắt đầu thiền</a>
+        </div>
+        <div class="detail-visual">
+          <div class="visual-card">
+            <i class="fas fa-feather"></i>
+            <strong>Buổi hướng dẫn</strong>
+            <span>Mọi trình độ</span>
+          </div>
+          <div class="visual-card">
+            <i class="fas fa-moon"></i>
+            <strong>Ngủ ngon hơn</strong>
+            <span>Dễ đi vào giấc ngủ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hỗ trợ Khẩn cấp -->
+  <section class="detail-section" id="crisis">
+    <div class="container">
+      <div class="detail-grid reverse">
+        <div class="detail-content">
+          <span class="section-badge">Hỗ trợ Khẩn cấp</span>
+          <h2 class="section-title">Trợ giúp ngay lập tức, luôn sẵn sàng</h2>
+          <p class="section-desc">Nếu bạn hoặc ai đó bạn biết đang gặp khủng hoảng, hãy liên hệ ngay. Đội hỗ trợ khẩn cấp của chúng tôi luôn trực 24/7, tất cả các ngày trong năm.</p>
+          <ul class="detail-list">
+            <li><i class="fas fa-check-circle"></i> Đường dây nóng 24/7: (555) 123-4567</li>
+            <li><i class="fas fa-check-circle"></i> Lịch hẹn khẩn cấp trong ngày</li>
+            <li><i class="fas fa-check-circle"></i> Đội phản ứng khẩn cấp lưu động</li>
+            <li><i class="fas fa-check-circle"></i> Hỗ trợ vận chuyển bệnh viện nếu cần</li>
+          </ul>
+          <a href="tel:5551234567" class="btn btn-primary btn-crisis">Gọi ngay</a>
+        </div>
+        <div class="detail-visual">
+          <div class="visual-card crisis-card">
+            <i class="fas fa-clock"></i>
+            <strong>Luôn trực 24/7</strong>
+            <span>Mọi lúc</span>
+          </div>
+          <div class="visual-card crisis-card">
+            <i class="fas fa-heart"></i>
+            <strong>Chăm sóc tức thì</strong>
+            <span>Không cần hẹn trước</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMMUNITY POSTS ============ -->
+  <section class="posts-section" id="posts">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Cộng đồng</span>
+        <h2 class="section-title">Chia sẻ &amp; kết nối</h2>
+        <p class="section-desc">Đăng tải suy nghĩ, trải nghiệm hoặc lời động viên của bạn cho người khác.</p>
+      </div>
+      <div class="posts-layout">
+        <div class="posts-create" id="postsCreate">
+          <div class="posts-create-header">
+            <div class="posts-create-avatar" id="postAvatar"><i class="fas fa-user"></i></div>
+            <input type="text" class="posts-create-input" id="postTitleInput" placeholder="Tiêu đề bài viết...">
+          </div>
+          <textarea class="posts-create-textarea" id="postContentInput" placeholder="Chia sẻ những gì bạn đang nghĩ..." rows="3"></textarea>
+          <div class="posts-create-actions">
+            <span class="posts-create-hint">Bài viết của bạn sẽ hiển thị cho tất cả sinh viên</span>
+            <button class="btn btn-primary btn-sm" id="postSubmitBtn">Đăng</button>
+          </div>
+        </div>
+        <div class="posts-feed" id="postsFeed">
+          <div class="posts-loading">Đang tải bài viết...</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MENTAL HEALTH TEST ============ -->
+  <section class="test-section" id="test">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Tự đánh giá</span>
+        <h2 class="section-title">Kiểm tra Sức khỏe Tâm thần</h2>
+        <p class="section-desc">Một bài tự đánh giá nhanh, ẩn danh giúp bạn hiểu rõ hơn về tình trạng của mình.</p>
+      </div>
+      <div class="test-container" id="testContainer">
+        <div class="test-intro" id="testIntro">
+          <div class="test-intro-icon"><i class="fas fa-heartbeat"></i></div>
+          <h3>Dạo này bạn cảm thấy thế nào?</h3>
+          <p>Trả lời 5 câu hỏi ngắn. Đây không phải chẩn đoán — chỉ là một bài kiểm tra nhẹ nhàng giúp bạn suy ngẫm.</p>
+          <button class="btn btn-primary" id="testStartBtn">Bắt đầu</button>
+        </div>
+        <div class="test-quiz hidden" id="testQuiz">
+          <div class="test-progress">
+            <div class="test-progress-bar" id="testProgressBar"></div>
+            <span class="test-progress-text" id="testProgressText">1 / 5</span>
+          </div>
+          <div class="test-question" id="testQuestion"></div>
+          <div class="test-options" id="testOptions"></div>
+          <div class="test-nav">
+            <button class="btn btn-outline btn-sm hidden" id="testPrevBtn">Trước</button>
+            <button class="btn btn-primary btn-sm" id="testNextBtn">Tiếp</button>
+          </div>
+        </div>
+        <div class="test-result hidden" id="testResult">
+          <div class="test-result-icon" id="testResultIcon"><i class="fas fa-smile"></i></div>
+          <h3 id="testResultTitle">Bạn đang làm tốt</h3>
+          <p id="testResultDesc"></p>
+          <div class="test-result-score">
+            <span class="test-score-label">Điểm của bạn</span>
+            <span class="test-score-value" id="testResultScore">0</span>
+            <span class="test-score-max">/ 15</span>
+          </div>
+          <div class="test-result-actions">
+            <button class="btn btn-outline btn-sm" id="testRetakeBtn">Làm lại</button>
+            <a href="#chat" class="btn btn-primary btn-sm">Nói chuyện với ai đó</a>
+          </div>
+        </div>
+        <div class="test-history hidden" id="testHistory">
+          <h3>Kết quả trước đây</h3>
+          <div id="testHistoryList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ APPOINTMENTS ============ -->
+  <section class="appointments-section" id="appointments">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Lịch hẹn</span>
+        <h2 class="section-title">Đặt lịch tư vấn</h2>
+        <p class="section-desc">Sắp xếp thời gian gặp riêng với đội ngũ tư vấn viên và nhân viên hỗ trợ.</p>
+      </div>
+      <div class="appointments-layout">
+        <div class="appointments-book">
+          <h3>Đặt lịch mới</h3>
+          <div class="appointments-form">
+            <label for="apptDate">Chọn ngày &amp; giờ</label>
+            <input type="datetime-local" id="apptDate" class="appt-input">
+            <button class="btn btn-primary" id="apptBookBtn">Đặt lịch</button>
+          </div>
+        </div>
+        <div class="appointments-list" id="appointmentsList">
+          <h3>Lịch hẹn của tôi</h3>
+          <div id="appointmentsFeed">
+            <p class="appointments-empty">Chưa có lịch hẹn nào. Đặt lịch đầu tiên của bạn ở trên.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAT SECTION ============ -->
+  <section class="chat-section" id="chat">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Trò chuyện</span>
+        <h2 class="section-title">Nói chuyện với chúng tôi ngay bây giờ</h2>
+        <p class="section-desc">Kết nối với người hỗ trợ hoặc bot sức khỏe để trò chuyện ngay lập tức.</p>
+      </div>
+      <div class="chat-container" id="chatContainer">
+        <!-- Contact List -->
+        <div class="chat-contacts" id="chatContacts">
+          <div class="chat-contacts-header">
+            <h3>Tin nhắn</h3>
+            <span class="chat-online-count" id="onlineCount">3 đang online</span>
+          </div>
+          <div class="chat-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Tìm kiếm liên hệ..." id="chatSearch">
+          </div>
+          <div class="chat-contacts-list" id="contactsList">
+            <div class="contact-item active" data-contact="wellness">
+              <div class="contact-avatar" style="background:#4A6FA5;">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="contact-info">
+                <div class="contact-name-row">
+                  <span class="contact-name">MindWell Bot</span>
+                  <span class="contact-time">bây giờ</span>
+                </div>
+                <div class="contact-preview">
+                  <span class="contact-status online"></span>
+                  <span class="contact-msg">Chào bạn! Mình có thể giúp gì cho bạn hôm nay?</span>
+                </div>
+              </div>
+            </div>
+            <div class="contact-item" data-contact="sarah">
+              <div class="contact-avatar" style="background:#6B9C7B;">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="contact-info">
+                <div class="contact-name-row">
+                  <span class="contact-name">Lan Anh</span>
+                  <span class="contact-time">2p trước</span>
+                </div>
+                <div class="contact-preview">
+                  <span class="contact-status online"></span>
+                  <span class="contact-msg">Mình ở đây nếu bạn cần nói chuyện</span>
+                </div>
+              </div>
+            </div>
+            <div class="contact-item" data-contact="james">
+              <div class="contact-avatar" style="background:#E8A87C;">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="contact-info">
+                <div class="contact-name-row">
+                  <span class="contact-name">Minh Tuấn</span>
+                  <span class="contact-time">1h trước</span>
+                </div>
+                <div class="contact-preview">
+                  <span class="contact-status"></span>
+                  <span class="contact-msg">Buổi tư vấn tiếp theo của bạn là ngày mai lúc 3h chiều</span>
+                </div>
+              </div>
+            </div>
+            <div class="contact-item" data-contact="maya">
+              <div class="contact-avatar" style="background:#E57373;">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="contact-info">
+                <div class="contact-name-row">
+                  <span class="contact-name">Phương Mai</span>
+                  <span class="contact-time">3h trước</span>
+                </div>
+                <div class="contact-preview">
+                  <span class="contact-status"></span>
+                  <span class="contact-msg">Đừng quên buổi trị liệu nhóm hôm nay nhé</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Conversation Panel -->
+        <div class="chat-conversation" id="chatConversation">
+          <div class="chat-conversation-header" id="chatHeader">
+            <div class="conv-back" id="convBack">
+              <i class="fas fa-arrow-left"></i>
+            </div>
+            <div class="conv-avatar" style="background:#4A6FA5;">
+              <i class="fas fa-robot"></i>
+            </div>
+            <div class="conv-info">
+              <span class="conv-name">MindWell Bot</span>
+              <span class="conv-status">Đang online</span>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+              <div class="bubble">Chào bạn! Mình là MindWell Bot. Mình ở đây để lắng nghe và giúp đỡ bạn. Hãy cho mình biết hôm nay bạn cảm thấy thế nào nhé.</div>
+              <span class="bubble-time">Vừa xong</span>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <button class="input-btn emoji-btn" id="emojiBtn"><i class="far fa-smile"></i></button>
+            <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." autocomplete="off">
+            <button class="input-btn attach-btn" id="attachBtn"><i class="fas fa-paperclip"></i></button>
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESOURCES ============ -->
+  <section class="resources" id="resources">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Tài nguyên</span>
+        <h2 class="section-title">Hỗ trợ trong tầm tay</h2>
+        <p class="section-desc">Truy cập nhanh các công cụ và liên hệ bạn cần.</p>
+      </div>
+      <div class="resources-grid">
+        <a href="#" class="resource-item">
+          <i class="fas fa-book-open"></i>
+          <span>Hướng dẫn tự lực</span>
+        </a>
+        <a href="#" class="resource-item">
+          <i class="fas fa-calendar-check"></i>
+          <span>Đặt lịch hẹn</span>
+        </a>
+        <a href="#" class="resource-item">
+          <i class="fas fa-phone-alt"></i>
+          <span>Đường dây nóng 24/7</span>
+        </a>
+        <a href="#" class="resource-item">
+          <i class="fas fa-map-marked-alt"></i>
+          <span>Bản đồ khuôn viên</span>
+        </a>
+        <a href="#" class="resource-item">
+          <i class="fas fa-hands-helping"></i>
+          <span>Hội thảo</span>
+        </a>
+        <a href="#" class="resource-item">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Hỗ trợ học tập</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo-icon"><i class="fas fa-brain"></i></span>
+          <span class="logo-text">MindWell</span>
+          <p>Nền tảng Hỗ trợ Sức khỏe Tâm thần Sinh viên. Luôn đồng hành cùng bạn trên mọi chặng đường.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Liên kết nhanh</h4>
+          <a href="#services">Dịch vụ</a>
+          <a href="#posts">Cộng đồng</a>
+          <a href="#test">Tự đánh giá</a>
+          <a href="#appointments">Lịch hẹn</a>
+          <a href="#chat">Trò chuyện</a>
+          <a href="#resources">Tài nguyên</a>
+        </div>
+        <div class="footer-links">
+          <h4>Liên hệ</h4>
+          <a href="tel:5551234567">(555) 123-4567</a>
+          <a href="mailto:support@mindwell.edu">support@mindwell.edu</a>
+          <a href="#">Trung tâm Y tế Sinh viên, Phòng 201</a>
+        </div>
+        <div class="footer-links">
+          <h4>Khẩn cấp</h4>
+          <a href="tel:911" class="emergency-link">Gọi 911</a>
+          <a href="tel:988">Đường dây Khủng hoảng: 988</a>
+          <a href="#">Nhắn tin: soạn HOME gửi 741741</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 MindWell. Mọi cuộc trò chuyện đều được bảo mật.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ AUTH MODAL ============ -->
+  <div class="modal-overlay hidden" id="authModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login">Đăng nhập</button>
+        <button class="modal-tab" data-tab="register">Đăng ký</button>
+      </div>
+      <form class="modal-form active" id="loginForm">
+        <h3>Chào mừng trở lại</h3>
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" class="modal-input" placeholder="email@của bạn.com" required>
+        <label for="loginPassword">Mật khẩu</label>
+        <input type="password" id="loginPassword" class="modal-input" placeholder="••••••••" required>
+        <div class="modal-error" id="loginError"></div>
+        <button type="submit" class="btn btn-primary modal-submit">Đăng nhập</button>
+      </form>
+      <form class="modal-form" id="registerForm">
+        <h3>Tạo tài khoản</h3>
+        <label for="registerName">Họ và tên</label>
+        <input type="text" id="registerName" class="modal-input" placeholder="Tên của bạn" required>
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" class="modal-input" placeholder="email@của bạn.com" required>
+        <label for="registerPassword">Mật khẩu</label>
+        <input type="password" id="registerPassword" class="modal-input" placeholder="Ít nhất 6 ký tự" required>
+        <div class="modal-error" id="registerError"></div>
+        <button type="submit" class="btn btn-primary modal-submit">Đăng ký</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ PAGE AGENT ============ -->
+  <div class="page-agent hidden" id="pageAgent">
+    <div class="agent-panel" id="agentPanel">
+      <div class="agent-header">
+        <span class="agent-header-icon"><i class="fas fa-robot"></i></span>
+        <span class="agent-header-title">Trợ lý MindWell</span>
+        <button class="agent-close" id="agentClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="agent-body" id="agentBody">
+        <div class="agent-message agent-bot">
+          <div class="agent-bubble">Chào bạn! Mình là trợ lý MindWell. Bạn cần mình giúp gì?<br><br>Ví dụ:<br>• Mở Thư viện Tâm lý<br>• Bắt đầu Kiểm tra Tâm lý<br>• Đi đến Diễn đàn Cộng đồng<br>• Mở Trò chuyện Tư vấn</div>
+        </div>
+      </div>
+      <div class="agent-quick-actions" id="agentQuickActions">
+        <button class="agent-quick-btn" data-cmd="library">📚 Thư viện</button>
+        <button class="agent-quick-btn" data-cmd="test">📝 Kiểm tra</button>
+        <button class="agent-quick-btn" data-cmd="forum">💬 Diễn đàn</button>
+        <button class="agent-quick-btn" data-cmd="chat">🤝 Tư vấn</button>
+      </div>
+      <div class="agent-input-area">
+        <input type="text" class="agent-input" id="agentInput" placeholder="Nhập yêu cầu..." autocomplete="off">
+        <button class="agent-send-btn" id="agentSendBtn"><i class="fas fa-arrow-up"></i></button>
+      </div>
+    </div>
+    <button class="agent-fab" id="agentFab">
+      <i class="fas fa-robot"></i>
+    </button>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script src="js/agent.js"></script>
+</body>
+</html>
