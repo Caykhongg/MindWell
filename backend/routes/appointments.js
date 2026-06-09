@@ -1,36 +1,34 @@
 const express = require('express');
-const { getDb } = require('../db');
+const db = require('../db');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/', authMiddleware, (req, res) => {
-  const db = getDb();
-  const appointments = db.prepare('SELECT * FROM appointments WHERE user_id = ? ORDER BY date DESC').all(req.userId);
+router.get('/', authMiddleware, async (req, res) => {
+  var appointments = await db.all('SELECT * FROM appointments WHERE user_id = $1 ORDER BY date DESC', [req.userId]);
   res.json({ appointments });
 });
 
-router.post('/', authMiddleware, (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   const { date } = req.body;
   if (!date) {
     return res.status(400).json({ error: 'Date is required' });
   }
 
-  const db = getDb();
-  const result = db.prepare('INSERT INTO appointments (user_id, date, status) VALUES (?, ?, ?)').run(req.userId, date, 'pending');
-  const appointment = db.prepare('SELECT * FROM appointments WHERE id = ?').get(result.lastInsertRowid);
+  var result = await db.run("INSERT INTO appointments (user_id, date, status) VALUES ($1, $2, $3) RETURNING id", [req.userId, date, 'pending']);
+  var apptId = db.isPg ? result.rows[0].id : result.lastInsertRowid;
+  var appointment = await db.get('SELECT * FROM appointments WHERE id = $1', [apptId]);
 
   res.status(201).json({ appointment });
 });
 
-router.patch('/:id', authMiddleware, (req, res) => {
+router.patch('/:id', authMiddleware, async (req, res) => {
   const { status } = req.body;
   if (!status) {
     return res.status(400).json({ error: 'Status is required' });
   }
 
-  const db = getDb();
-  const appointment = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
+  const appointment = await db.get('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
   if (!appointment) {
     return res.status(404).json({ error: 'Appointment not found' });
   }
@@ -38,8 +36,8 @@ router.patch('/:id', authMiddleware, (req, res) => {
     return res.status(403).json({ error: 'Not authorized' });
   }
 
-  db.prepare('UPDATE appointments SET status = ? WHERE id = ?').run(status, req.params.id);
-  const updated = db.prepare('SELECT * FROM appointments WHERE id = ?').get(req.params.id);
+  await db.run('UPDATE appointments SET status = $1 WHERE id = $2', [status, req.params.id]);
+  const updated = await db.get('SELECT * FROM appointments WHERE id = $1', [req.params.id]);
   res.json({ appointment: updated });
 });
 

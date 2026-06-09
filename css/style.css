@@ -1724,36 +1724,6 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
-   Chat Feedback
-   ============================================================ */
-.feedback-btns {
-  display: flex;
-  gap: 6px;
-  margin-top: 6px;
-  padding: 0 4px;
-}
-
-.feedback-btn {
-  background: none;
-  border: none;
-  font-size: 0.78rem;
-  color: var(--gray);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: var(--transition);
-}
-
-.feedback-btn:hover {
-  background: var(--gray-light);
-  color: var(--dark-secondary);
-}
-
-.message.bot .feedback-btns {
-  align-self: flex-start;
-}
-
-/* ============================================================
    Scroll Animations
    ============================================================ */
 .detail-section {

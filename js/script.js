@@ -13,8 +13,7 @@
   var state = {
     token: localStorage.getItem('mw_token') || null,
     user: null,
-    currentContact: 'wellness',
-    isBotTyping: false,
+    currentContact: null,
     testStep: 0,
     testAnswers: [],
     testQuestions: [
@@ -92,7 +91,6 @@
   var apptBookBtn = $('apptBookBtn');
   var appointmentsFeed = $('appointmentsFeed');
 
-  var contactItems = document.querySelectorAll('.contact-item');
   var chatMessages = $('chatMessages');
   var chatInput = $('chatInput');
   var sendBtn = $('sendBtn');
@@ -101,9 +99,11 @@
   var convBack = $('convBack');
   var chatContacts = $('chatContacts');
   var chatConversation = $('chatConversation');
-  var convName = document.querySelector('.conv-name');
-  var convAvatar = document.querySelector('.conv-avatar');
-  var convStatus = document.querySelector('.conv-status');
+  var contactsList = $('contactsList');
+  var convName = $('convName');
+  var convAvatar = $('convAvatar');
+  var convStatus = $('convStatus');
+  var convInfo = $('convInfo');
 
   // ----------------------------------------------------------
   // API helpers
@@ -213,6 +213,7 @@
       loadPosts();
       loadAppointments();
       loadTestHistory();
+      loadConversations();
     }).catch(function (err) {
       loginError.textContent = err.message;
     }).finally(function () {
@@ -240,6 +241,7 @@
       loadPosts();
       loadAppointments();
       loadTestHistory();
+      loadConversations();
     }).catch(function (err) {
       registerError.textContent = err.message;
     }).finally(function () {
@@ -253,6 +255,16 @@
     state.user = null;
     localStorage.removeItem('mw_token');
     setUser(null);
+    if (pollTimer) clearInterval(pollTimer);
+    currentConvId = null;
+    contactsList.innerHTML = '<div class="posts-empty" style="padding:20px;text-align:center;font-size:0.85rem">Đăng nhập để xem tin nhắn</div>';
+    chatMessages.innerHTML = '<div class="posts-empty">Chọn một liên hệ để bắt đầu trò chuyện</div>';
+    chatInput.disabled = true;
+    chatInput.placeholder = 'Đăng nhập để trò chuyện';
+    convName.textContent = 'Chọn liên hệ';
+    convStatus.textContent = '';
+    convAvatar.style.display = 'none';
+    onlineCount.textContent = '0 liên hệ';
     loadPosts();
     loadAppointments();
   });
@@ -587,75 +599,95 @@
   });
 
   // ----------------------------------------------------------
-  // Chat contacts
+  // Chat — Real-time human-to-human messaging
   // ----------------------------------------------------------
-  var contacts = {
-    wellness: {
-      name: 'MindWell Bot', status: 'Đang online', statusClass: 'online',
-      avatarBg: '#4A6FA5', avatarIcon: 'fa-robot',
-      messages: [{ type: 'bot', text: 'Chào bạn! Mình là MindWell Bot. Mình ở đây để lắng nghe và giúp đỡ bạn. Hãy cho mình biết hôm nay bạn cảm thấy thế nào nhé.' }]
-    },
-    sarah: {
-      name: 'Lan Anh', status: 'Đang online', statusClass: 'online',
-      avatarBg: '#6B9C7B', avatarIcon: 'fa-user',
-      messages: [{ type: 'bot', text: 'Chào bạn! Mình là Lan Anh, người hỗ trợ đồng trang lứa. Hôm nay bạn thế nào?' }]
-    },
-    james: {
-      name: 'Minh Tuấn', status: 'Ngoại tuyến', statusClass: '',
-      avatarBg: '#E8A87C', avatarIcon: 'fa-user',
-      messages: [{ type: 'bot', text: 'Chào bạn, mình là Minh Tuấn. Buổi tư vấn tiếp theo của bạn đã được lịch vào ngày mai lúc 3h chiều. Hãy cho mình biết nếu bạn cần đổi lịch nhé.' }]
-    },
-    maya: {
-      name: 'Phương Mai', status: 'Ngoại tuyến', statusClass: '',
-      avatarBg: '#E57373', avatarIcon: 'fa-user',
-      messages: [{ type: 'bot', text: 'Chào! Nhắc nhở nhỏ: buổi trị liệu nhóm hôm nay lúc 5h chiều. Hy vọng gặp bạn ở đó!' }]
-    }
-  };
+  var currentConvId = null;
+  var lastMsgId = 0;
+  var pollTimer = null;
+  var contactsCache = [];
+  var convsCache = [];
 
-  var botReplies = [];
-  var fallbackReply = 'Cảm ơn bạn đã chia sẻ với mình. Bạn có thể kể thêm về cảm xúc của bạn không? Mình ở đây để lắng nghe.';
-
-  function loadBotReplies() {
-    api('/bot').then(function (data) {
-      botReplies = data.replies.map(function (r) {
-        return { keywords: r.keywords.split(', '), reply: r.reply, id: r.id };
-      });
-    }).catch(function () {
-      botReplies = [];
-    });
-  }
-
-  function sendFeedback(messageText, botReply, helpful) {
-    var matched = null;
-    for (var i = 0; i < botReplies.length; i++) {
-      if (botReplies[i].reply === botReply) { matched = botReplies[i]; break; }
-    }
-    api('/bot/feedback', {
-      method: 'POST',
-      body: {
-        message_text: messageText,
-        bot_reply: botReply,
-        helpful: helpful ? 1 : 0,
-        keywords: matched ? matched.keywords.join(', ') : ''
-      }
+  function loadContacts() {
+    api('/chat/contacts').then(function (data) {
+      contactsCache = data.contacts;
     }).catch(function () {});
   }
 
-  function switchContact(contactId) {
-    if (contactId === state.currentContact || state.isBotTyping) return;
-    state.currentContact = contactId;
-    var contact = contacts[contactId];
+  function loadConversations() {
+    if (!state.token) {
+      contactsList.innerHTML = '<div class="posts-empty" style="padding:20px;text-align:center;font-size:0.85rem">Đăng nhập để xem tin nhắn</div>';
+      return;
+    }
+    convsCache = [];
+    api('/chat/conversations').then(function (data) {
+      var els = document.querySelectorAll('.contact-item');
+      els.forEach(function (el) { el.remove(); });
+      convsCache = data.conversations || [];
 
-    contactItems.forEach(function (item) {
-      item.classList.toggle('active', item.getAttribute('data-contact') === contactId);
+      if (convsCache.length === 0) {
+        contactsList.innerHTML = '<div class="posts-empty" style="padding:20px;text-align:center;font-size:0.85rem">Chưa có hội thoại nào</div>';
+        updateOnlineCount();
+        return;
+      }
+
+      contactsList.innerHTML = '';
+      convsCache.forEach(function (conv) {
+        var otherId = conv.user1_id === state.user.id ? conv.user2_id : conv.user1_id;
+        var otherName = conv.user1_id === state.user.id ? conv.user2_name : conv.user1_name;
+        var avatarColors = ['#4A6FA5', '#6B9C7B', '#E8A87C', '#E57373', '#9575CD'];
+        var colorIdx = (otherId % avatarColors.length);
+
+        var item = document.createElement('div');
+        item.className = 'contact-item' + (currentConvId === conv.id ? ' active' : '');
+        item.setAttribute('data-conv-id', conv.id);
+        item.setAttribute('data-other-id', otherId);
+        item.setAttribute('data-other-name', otherName);
+        item.innerHTML =
+          '<div class="contact-avatar" style="background:' + avatarColors[colorIdx] + ';">' +
+            '<i class="fas fa-user"></i>' +
+          '</div>' +
+          '<div class="contact-info">' +
+            '<div class="contact-name-row">' +
+              '<span class="contact-name">' + escapeHtml(otherName) + '</span>' +
+              '<span class="contact-time">' + (conv.last_message_at ? formatTime(conv.last_message_at) : '') + '</span>' +
+            '</div>' +
+            '<div class="contact-preview">' +
+              '<span class="contact-status online"></span>' +
+              '<span class="contact-msg">' + escapeHtml(conv.last_message || 'Nhắn tin ngay') + '</span>' +
+            '</div>' +
+          '</div>';
+        item.addEventListener('click', function () {
+          switchConversation(conv.id, otherId, otherName, avatarColors[colorIdx]);
+        });
+        contactsList.appendChild(item);
+      });
+
+      updateOnlineCount();
+    }).catch(function () {
+      contactsList.innerHTML = '<div class="posts-empty" style="padding:20px;text-align:center;font-size:0.85rem">Không thể tải</div>';
+    });
+  }
+
+  function switchConversation(convId, otherId, otherName, avatarColor) {
+    if (convId === currentConvId) return;
+    currentConvId = convId;
+    lastMsgId = 0;
+    chatInput.disabled = false;
+    chatInput.placeholder = 'Nhập tin nhắn...';
+
+    document.querySelectorAll('.contact-item').forEach(function (el) {
+      el.classList.toggle('active', parseInt(el.getAttribute('data-conv-id')) === convId);
     });
 
-    convName.textContent = contact.name;
-    convAvatar.style.background = contact.avatarBg;
-    convAvatar.innerHTML = '<i class="fas ' + contact.avatarIcon + '"></i>';
-    convStatus.textContent = contact.status;
-    convStatus.style.color = contact.statusClass ? '#4CAF50' : '#A0AEC0';
-    renderMessages(contactId);
+    convAvatar.style.display = 'flex';
+    convAvatar.style.background = avatarColor || '#4A6FA5';
+    convAvatar.innerHTML = '<i class="fas fa-user"></i>';
+    convName.textContent = otherName || 'Đang trò chuyện';
+    convStatus.textContent = 'Đang online';
+    convStatus.style.color = '#4CAF50';
+
+    loadMessages(convId);
+    startPolling(convId);
 
     if (window.innerWidth <= 768) {
       chatContacts.classList.add('hidden');
@@ -663,25 +695,47 @@
     }
   }
 
-  contactItems.forEach(function (item) {
-    item.addEventListener('click', function () {
-      switchContact(item.getAttribute('data-contact'));
+  function loadMessages(convId) {
+    api('/chat/conversations/' + convId + '/messages?after=0').then(function (data) {
+      chatMessages.innerHTML = '';
+      var msgs = data.messages || [];
+      msgs.forEach(function (m) {
+        appendMessage(m.sender_id === state.user.id ? 'user' : 'other', m.text, false);
+        if (m.id > lastMsgId) lastMsgId = m.id;
+      });
+      if (msgs.length === 0) {
+        chatMessages.innerHTML = '<div class="posts-empty" style="padding:20px;text-align:center;font-size:0.85rem">Chưa có tin nhắn nào. Hãy gửi tin nhắn đầu tiên!</div>';
+      }
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }).catch(function () {
+      chatMessages.innerHTML = '<div class="posts-empty">Không thể tải tin nhắn</div>';
     });
-  });
+  }
 
-  function renderMessages(contactId) {
-    var contact = contacts[contactId];
-    if (!contact) return;
-    chatMessages.innerHTML = '';
-    contact.messages.forEach(function (msg) {
-      appendMessage(msg.type, msg.text, false);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+  function startPolling(convId) {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(function () {
+      if (!convId) return;
+      api('/chat/conversations/' + convId + '/messages?after=' + lastMsgId).then(function (data) {
+        var msgs = data.messages || [];
+        if (msgs.length === 0) return;
+        var emptyMsg = chatMessages.querySelector('.posts-empty');
+        if (emptyMsg) emptyMsg.remove();
+        msgs.forEach(function (m) {
+          if (m.sender_id !== state.user.id) {
+            appendMessage('other', m.text, true);
+          }
+          if (m.id > lastMsgId) lastMsgId = m.id;
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        loadConversations();
+      }).catch(function () {});
+    }, 3000);
   }
 
   function appendMessage(type, text, animate) {
     var msgDiv = document.createElement('div');
-    msgDiv.className = 'message ' + type;
+    msgDiv.className = 'message ' + (type === 'user' ? 'user' : 'bot');
     var bubble = document.createElement('div');
     bubble.className = 'bubble';
     bubble.textContent = text;
@@ -691,31 +745,6 @@
     time.textContent = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     msgDiv.appendChild(bubble);
     msgDiv.appendChild(time);
-
-    if (type === 'bot' && state.currentContact === 'wellness') {
-      var feedbackDiv = document.createElement('div');
-      feedbackDiv.className = 'feedback-btns';
-      var btn1 = document.createElement('button');
-      btn1.className = 'feedback-btn';
-      btn1.innerHTML = '<i class="far fa-thumbs-up"></i>';
-      btn1.addEventListener('click', function () {
-        btn1.innerHTML = '<i class="fas fa-thumbs-up" style="color:#6B9C7B;"></i>';
-        btn2.innerHTML = '<i class="far fa-thumbs-down"></i>';
-        sendFeedback(userLastMsg, text, true);
-      });
-      var btn2 = document.createElement('button');
-      btn2.className = 'feedback-btn';
-      btn2.innerHTML = '<i class="far fa-thumbs-down"></i>';
-      btn2.addEventListener('click', function () {
-        btn2.innerHTML = '<i class="fas fa-thumbs-down" style="color:#E57373;"></i>';
-        btn1.innerHTML = '<i class="far fa-thumbs-up"></i>';
-        sendFeedback(userLastMsg, text, false);
-      });
-      feedbackDiv.appendChild(btn1);
-      feedbackDiv.appendChild(btn2);
-      msgDiv.appendChild(feedbackDiv);
-    }
-
     if (!animate) {
       msgDiv.style.animation = 'none';
       msgDiv.style.opacity = '1';
@@ -725,44 +754,57 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  var userLastMsg = '';
-
   function sendMessage() {
-    var text = chatInput.value.trim();
-    if (!text || state.isBotTyping) return;
-
-    contacts[state.currentContact].messages.push({ type: 'user', text: text });
-    appendMessage('user', text, true);
-    userLastMsg = text;
-    chatInput.value = '';
-
-    if (state.currentContact === 'wellness') {
-      state.isBotTyping = true;
-      sendBtn.disabled = true;
-      sendBtn.style.opacity = '0.5';
-
-      setTimeout(function () {
-        var reply = getBotReply(text);
-        contacts.wellness.messages.push({ type: 'bot', text: reply });
-        appendMessage('bot', reply, true);
-        state.isBotTyping = false;
-        sendBtn.disabled = false;
-        sendBtn.style.opacity = '1';
-      }, 800 + Math.random() * 600);
+    if (!currentConvId) {
+      if (!state.token) { openModal('login'); return; }
+      startNewConversation();
+      return;
     }
+    var text = chatInput.value.trim();
+    if (!text || sendBtn.disabled) return;
+    chatInput.value = '';
+    sendBtn.disabled = true;
+    sendBtn.style.opacity = '0.5';
+
+    api('/chat/conversations/' + currentConvId + '/messages', {
+      method: 'POST',
+      body: { text: text }
+    }).then(function (data) {
+      var emptyMsg = chatMessages.querySelector('.posts-empty');
+      if (emptyMsg) emptyMsg.remove();
+      appendMessage('user', text, true);
+      if (data.message && data.message.id > lastMsgId) lastMsgId = data.message.id;
+      loadConversations();
+    }).catch(function () {
+      chatInput.value = text;
+    }).finally(function () {
+      sendBtn.disabled = false;
+      sendBtn.style.opacity = '1';
+    });
   }
 
-  function getBotReply(userText) {
-    var lower = userText.toLowerCase();
-    for (var i = 0; i < botReplies.length; i++) {
-      var entry = botReplies[i];
-      for (var j = 0; j < entry.keywords.length; j++) {
-        if (lower.indexOf(entry.keywords[j]) !== -1) {
-          return entry.reply;
-        }
-      }
-    }
-    return fallbackReply;
+  function startNewConversation() {
+    var doCreate = function (contacts) {
+      if (contacts.length === 0) { alert('Hiện không có hỗ trợ viên nào.'); return; }
+      var chosen = contacts[0];
+      api('/chat/conversations', {
+        method: 'POST',
+        body: { contact_id: chosen.id }
+      }).then(function (data) {
+        currentConvId = data.conversation.id;
+        loadConversations();
+        switchConversation(currentConvId, chosen.id, chosen.name, '#4A6FA5');
+      }).catch(function (err) {
+        alert('Lỗi: ' + err.message);
+      });
+    };
+    if (contactsCache.length > 0) { doCreate(contactsCache); return; }
+    api('/chat/contacts').then(function (data) {
+      contactsCache = data.contacts || [];
+      doCreate(contactsCache);
+    }).catch(function () {
+      alert('Không thể lấy danh sách hỗ trợ viên.');
+    });
   }
 
   sendBtn.addEventListener('click', sendMessage);
@@ -775,25 +817,39 @@
 
   chatSearch.addEventListener('input', function () {
     var query = chatSearch.value.toLowerCase().trim();
-    contactItems.forEach(function (item) {
+    document.querySelectorAll('.contact-item').forEach(function (item) {
       var name = item.querySelector('.contact-name').textContent.toLowerCase();
       var msg = item.querySelector('.contact-msg').textContent.toLowerCase();
       item.style.display = (name.indexOf(query) !== -1 || msg.indexOf(query) !== -1) ? 'flex' : 'none';
     });
-    var visible = 0;
-    contactItems.forEach(function (item) {
-      if (item.style.display !== 'none') {
-        var el = item.querySelector('.contact-status');
-        if (el && el.classList.contains('online')) visible++;
-      }
-    });
-    onlineCount.textContent = visible + ' đang online';
+    updateOnlineCount();
   });
+
+  function updateOnlineCount() {
+    var visible = 0;
+    document.querySelectorAll('.contact-item').forEach(function (item) {
+      if (item.style.display !== 'none') visible++;
+    });
+    onlineCount.textContent = visible + ' liên hệ';
+  }
+
+  function formatTime(dateStr) {
+    if (!dateStr) return '';
+    var d = new Date(dateStr);
+    var now = new Date();
+    var diff = (now - d) / 1000;
+    if (diff < 60) return 'Vừa xong';
+    if (diff < 3600) return Math.floor(diff / 60) + 'p trước';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h trước';
+    return d.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' });
+  }
 
   document.getElementById('emojiBtn').addEventListener('click', function () { chatInput.focus(); });
   document.getElementById('attachBtn').addEventListener('click', function () { chatInput.focus(); });
 
   convBack.addEventListener('click', function () {
+    if (pollTimer) clearInterval(pollTimer);
+    currentConvId = null;
     chatContacts.classList.remove('hidden');
     chatConversation.classList.add('hidden');
   });
@@ -834,15 +890,13 @@
   loadPosts();
   loadAppointments();
   loadTestHistory();
-  loadBotReplies();
+  loadContacts();
+  loadConversations();
 
-  var initialOnline = 0;
-  contactItems.forEach(function (item) {
-    var el = item.querySelector('.contact-status');
-    if (el && el.classList.contains('online')) initialOnline++;
-  });
-  onlineCount.textContent = initialOnline + ' đang online';
-  renderMessages('wellness');
+  chatInput.disabled = true;
+  chatInput.placeholder = 'Đăng nhập để trò chuyện';
+  onlineCount.textContent = '0 liên hệ';
+  convAvatar.style.display = 'none';
   revealSections();
 
 })();
