@@ -213,7 +213,8 @@
       loadPosts();
       loadAppointments();
       loadTestHistory();
-      loadConversations();
+      loadContacts();
+      setupChatAfterLogin();
     }).catch(function (err) {
       loginError.textContent = err.message;
     }).finally(function () {
@@ -241,7 +242,8 @@
       loadPosts();
       loadAppointments();
       loadTestHistory();
-      loadConversations();
+      loadContacts();
+      setupChatAfterLogin();
     }).catch(function (err) {
       registerError.textContent = err.message;
     }).finally(function () {
@@ -894,6 +896,12 @@
     onlineCount.textContent = visible + ' liên hệ';
   }
 
+  function setupChatAfterLogin() {
+    chatInput.disabled = true;
+    chatInput.placeholder = 'Chọn người dùng để trò chuyện';
+    loadConversations();
+  }
+
   function formatTime(dateStr) {
     if (!dateStr) return '';
     var d = new Date(dateStr);
@@ -952,11 +960,16 @@
   loadAppointments();
   loadTestHistory();
   loadContacts();
-  loadConversations();
 
-  chatInput.disabled = true;
-  chatInput.placeholder = 'Đăng nhập để trò chuyện';
-  onlineCount.textContent = '0 liên hệ';
+  if (state.token) {
+    setupChatAfterLogin();
+  } else {
+    loadConversations();
+    chatInput.disabled = true;
+    chatInput.placeholder = 'Đăng nhập để trò chuyện';
+    onlineCount.textContent = '0 liên hệ';
+  }
+
   convAvatar.style.display = 'none';
   revealSections();
 
