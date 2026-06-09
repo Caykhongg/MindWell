@@ -736,9 +736,8 @@
       method: 'POST',
       body: { contact_id: agentId }
     }).then(function (data) {
-      currentConvId = data.conversation.id;
       loadConversations();
-      switchConversation(currentConvId, agentId, agentName, agentColor || '#4A6FA5');
+      switchConversation(data.conversation.id, agentId, agentName, agentColor || '#4A6FA5');
     }).catch(function (err) {
       alert('Lỗi: ' + err.message);
     });
