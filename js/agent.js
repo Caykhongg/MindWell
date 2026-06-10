@@ -17,25 +17,25 @@
   // ----------------------------------------------------------
   var sectionMap = {
     library:    { id: 'resources',    label: 'Thư viện Tâm lý' },
-    thu vien:   { id: 'resources',    label: 'Thư viện Tâm lý' },
+    'thu vien':   { id: 'resources',    label: 'Thư viện Tâm lý' },
     mental:     { id: 'resources',    label: 'Thư viện Tâm lý' },
     test:       { id: 'test',         label: 'Kiểm tra Tâm lý' },
-    kiem tra:   { id: 'test',         label: 'Kiểm tra Tâm lý' },
-    forum:      { id: 'posts',        label: 'Diễn đàn Cộng đồng' },
-    dien dan:   { id: 'posts',        label: 'Diễn đàn Cộng đồng' },
-    cong dong:  { id: 'posts',        label: 'Diễn đàn Cộng đồng' },
-    chat:       { id: 'chat',         label: 'Trò chuyện Tư vấn' },
-    tro chuyen: { id: 'chat',         label: 'Trò chuyện Tư vấn' },
+    'kiem tra':   { id: 'test',         label: 'Kiểm tra Tâm lý' },
+    forum:        { id: 'posts',        label: 'Diễn đàn Cộng đồng' },
+    'dien dan':   { id: 'posts',        label: 'Diễn đàn Cộng đồng' },
+    'cong dong':  { id: 'posts',        label: 'Diễn đàn Cộng đồng' },
+    chat:         { id: 'chat',         label: 'Trò chuyện Tư vấn' },
+    'tro chuyen': { id: 'chat',         label: 'Trò chuyện Tư vấn' },
     counseling: { id: 'counseling',   label: 'Tư vấn Cá nhân' },
     group:      { id: 'group',        label: 'Trị liệu Nhóm' },
     mindfulness: { id: 'mindfulness', label: 'Chánh niệm & Thiền' },
     thien:      { id: 'mindfulness',  label: 'Chánh niệm & Thiền' },
-    crisis:     { id: 'crisis',       label: 'Hỗ trợ Khẩn cấp' },
-    khan cap:   { id: 'crisis',       label: 'Hỗ trợ Khẩn cấp' },
-    appointments: { id: 'appointments', label: 'Lịch hẹn' },
-    lich hen:   { id: 'appointments', label: 'Lịch hẹn' },
-    services:   { id: 'services',     label: 'Dịch vụ' },
-    dich vu:    { id: 'services',     label: 'Dịch vụ' }
+    crisis:        { id: 'crisis',       label: 'Hỗ trợ Khẩn cấp' },
+    'khan cap':    { id: 'crisis',       label: 'Hỗ trợ Khẩn cấp' },
+    appointments:  { id: 'appointments', label: 'Lịch hẹn' },
+    'lich hen':    { id: 'appointments', label: 'Lịch hẹn' },
+    services:      { id: 'services',     label: 'Dịch vụ' },
+    'dich vu':     { id: 'services',     label: 'Dịch vụ' }
   };
 
   // ----------------------------------------------------------
