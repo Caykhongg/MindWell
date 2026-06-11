@@ -3,15 +3,37 @@ import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 import { closeDatabase } from './config/database.js';
 import { initWebSocketServer } from './websocket/index.js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import type { Server } from 'http';
 
-const server = app.listen(config.port, () => {
-  logger.info(`MindWell API running on port ${config.port} [${config.nodeEnv}]`);
+let server: Server;
+
+async function runMigrations() {
+  try {
+    const sql = postgres(config.database.url, { max: 1 });
+    const db = drizzle(sql);
+    logger.info('Running database migrations...');
+    await migrate(db, { migrationsFolder: 'src/db/migrations' });
+    logger.info('Database migrations complete');
+    await sql.end();
+  } catch (err) {
+    logger.error({ err }, 'Migration failed, starting server anyway');
+  }
+}
+
+runMigrations().then(() => {
+  server = app.listen(config.port, () => {
+    logger.info(`MindWell API running on port ${config.port} [${config.nodeEnv}]`);
+  });
+
+  initWebSocketServer(server);
 });
-
-initWebSocketServer(server);
 
 function shutdown(signal: string) {
   logger.info(`Received ${signal}, shutting down gracefully...`);
+  if (!server) process.exit(0);
   server.close(async () => {
     logger.info('HTTP server closed');
     await closeDatabase();
