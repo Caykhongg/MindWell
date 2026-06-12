@@ -39,6 +39,9 @@ export function SVGFollower({
   const animationRef = useRef<number>(0)
   const [isRecording, setIsRecording] = useState(false)
   const recordingRef = useRef<Position[]>([])
+  const [size, setSize] = useState({ width: 1400, height: 1200 })
+  const removeDelayRef = useRef(removeDelay)
+  removeDelayRef.current = removeDelay
 
   class Follower {
     private points: Point[] = []
@@ -234,6 +237,20 @@ export function SVGFollower({
     animationRef.current = requestAnimationFrame(animate)
   }, [])
 
+  // Track container size with ResizeObserver
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    const ro = new ResizeObserver((entries) => {
+      const { width: w, height: h } = entries[0].contentRect
+      setSize({ width: w || 1400, height: h || 1200 })
+    })
+    ro.observe(el)
+
+    return () => ro.disconnect()
+  }, [])
+
   // Fullscreen mode: track mouse/touch via window
   useEffect(() => {
     if (!autoPlay) return
@@ -284,7 +301,6 @@ export function SVGFollower({
     <div
       ref={containerRef}
       className={`relative overflow-hidden ${className}`}
-      style={{ width, height }}
       onMouseMove={handleContainerMouseMove}
       onTouchMove={handleContainerTouchMove}
       onMouseDown={autoPlay ? undefined : startRecording}
@@ -292,7 +308,12 @@ export function SVGFollower({
       onTouchStart={autoPlay ? undefined : startRecording}
       onTouchEnd={autoPlay ? undefined : stopRecording}
     >
-      <svg ref={svgRef} width={width} height={height} xmlns="http://www.w3.org/2000/svg" className="absolute inset-0" />
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${size.width} ${size.height}`}
+        xmlns="http://www.w3.org/2000/svg"
+        className="absolute inset-0 w-full h-full"
+      />
     </div>
   )
 }

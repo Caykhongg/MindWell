@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
-import { useSaveTest } from '@/hooks/use-tests'
-import { TEST_TYPES } from './test-data'
+import { useSaveTest, useTestTemplates } from '@/hooks/use-tests'
+import { TEST_TYPES, TEST_OPTIONS } from './test-data'
 import { TestIntro } from './test-intro'
 import { TestQuiz } from './test-quiz'
 import { TestResultView } from './test-result'
@@ -21,11 +21,37 @@ function findSeverity(test: TestType, score: number): SeverityLevel {
   return sorted[sorted.length - 1]
 }
 
+function templateToTestType(t: any): TestType {
+  const defaultOptions = t.questions[0]?.options ?? TEST_OPTIONS
+  const maxScore = t.questions.length * (defaultOptions[defaultOptions.length - 1]?.value ?? 3)
+  const qtr = Math.floor(maxScore / 4)
+  return {
+    id: `template_${t.id}`,
+    name: t.title,
+    description: t.description,
+    time: `${t.questions.length} câu`,
+    questions: t.questions.map((q: any) => q.questionText),
+    options: defaultOptions,
+    severityLevels: [
+      { min: 0, max: qtr, label: 'Bình thường', description: 'Kết quả bình thường.', recommendation: 'Duy trì thói quen lành mạnh.', color: '#7BA38B' },
+      { min: qtr + 1, max: qtr * 2, label: 'Nhẹ', description: 'Kết quả nhẹ.', recommendation: 'Theo dõi và nghỉ ngơi nhiều hơn.', color: '#C9A97C' },
+      { min: qtr * 2 + 1, max: qtr * 3, label: 'Vừa', description: 'Kết quả trung bình.', recommendation: 'Nên tham khảo ý kiến chuyên gia.', color: '#D4A5A5' },
+      { min: qtr * 3 + 1, max: maxScore, label: 'Nặng', description: 'Kết quả cao.', recommendation: 'Liên hệ chuyên gia sức khỏe tâm thần.', color: '#C97C7C' },
+    ],
+  }
+}
+
 export function TestPage() {
   const { isAuthenticated, user } = useAuthStore()
   const saveMutation = useSaveTest()
+  const { data: apiTemplates } = useTestTemplates()
   const role = user?.role ?? 'patient'
   const canManage = role === 'therapist' || role === 'admin'
+
+  const allTests: TestType[] = [
+    ...TEST_TYPES,
+    ...(apiTemplates ?? []).map(templateToTestType),
+  ]
 
   const [pageTab, setPageTab] = useState<'test' | 'manage'>('test')
   const [view, setView] = useState<View>('select')
@@ -147,9 +173,9 @@ export function TestPage() {
       case 'history':
         return (
           <TestHistory
-            testTypes={TEST_TYPES}
+            testTypes={allTests}
             onViewResult={(testResult) => {
-              const test = TEST_TYPES.find((t) => t.id === testResult.test_type)
+              const test = allTests.find((t) => t.id === testResult.test_type)
               if (test) {
                 setSelectedTest(test)
                 setScore(testResult.score)
@@ -179,7 +205,7 @@ export function TestPage() {
       </header>
 
       <div className="grid gap-4 max-w-lg mx-auto">
-        {TEST_TYPES.map((test) => (
+        {allTests.map((test) => (
           <button
             key={test.id}
             type="button"
