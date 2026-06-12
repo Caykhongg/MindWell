@@ -12,8 +12,11 @@ import { ChatPage } from '@/components/features/chat/chat-page'
 import { PageAgent } from '@/components/features/agent/page-agent'
 import { ExpandableTabs } from '@/components/ui/expandable-tabs'
 import { SVGFollower } from '@/components/ui/svg-follower'
-import { BookOpen, ClipboardCheck, Users, Calendar, MessageCircle, Home, PlusCircle, UserCog } from 'lucide-react'
+import { BookOpen, ClipboardCheck, Users, Calendar, MessageCircle, Home, PlusCircle, UserCog, Library } from 'lucide-react'
 import { RoleRequestPage } from '@/components/features/auth/role-request'
+import { LibraryPage } from '@/components/features/library/library-page'
+import { LibraryDetail } from '@/components/features/library/library-detail'
+import { LibraryManage } from '@/components/features/library/library-manage'
 import type { LucideIcon } from 'lucide-react'
 
 const navTabs: ({ title: string; icon: LucideIcon } | { type: 'separator' })[] = [
@@ -21,12 +24,13 @@ const navTabs: ({ title: string; icon: LucideIcon } | { type: 'separator' })[] =
   { type: 'separator' as const },
   { title: 'Nhật ký', icon: BookOpen },
   { title: 'Kiểm tra', icon: ClipboardCheck },
+  { title: 'Thư viện', icon: Library },
   { title: 'Cộng đồng', icon: Users },
   { title: 'Lịch hẹn', icon: Calendar },
   { title: 'Tin nhắn', icon: MessageCircle },
 ]
 
-const tabRoutes = ['/', '/diary', '/test', '/community', '/appointments', '/chat']
+const tabRoutes = ['/', '/diary', '/test', '/library', '/community', '/appointments', '/chat']
 
 function NavBar() {
   const [authOpen, setAuthOpen] = useState(false)
@@ -53,13 +57,22 @@ function NavBar() {
             {isAuthenticated && user ? (
               <>
                 {canManageTests && (
-                  <Link
-                    to="/test/manage"
-                    className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
-                  >
-                    <PlusCircle size={14} />
-                    Quản lý test
-                  </Link>
+                  <>
+                    <Link
+                      to="/test/manage"
+                      className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
+                    >
+                      <PlusCircle size={14} />
+                      Quản lý test
+                    </Link>
+                    <Link
+                      to="/library/manage"
+                      className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
+                    >
+                      <PlusCircle size={14} />
+                      Đăng bài viết
+                    </Link>
+                  </>
                 )}
                 {role === 'patient' && (
                   <Link
@@ -68,6 +81,15 @@ function NavBar() {
                   >
                     <UserCog size={14} />
                     Làm tư vấn viên
+                  </Link>
+                )}
+                {role === 'admin' && (
+                  <Link
+                    to="/role-request"
+                    className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
+                  >
+                    <UserCog size={14} />
+                    Quản lý yêu cầu
                   </Link>
                 )}
                 <span className="text-sm text-fg-secondary mr-2 hidden sm:inline">{user.name}</span>
@@ -196,6 +218,9 @@ function AppLayout() {
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/role-request" element={<RoleRequestPage />} />
+          <Route path="/library" element={<LibraryPage />} />
+          <Route path="/library/:id" element={<LibraryDetail />} />
+          <Route path="/library/manage" element={<LibraryManage />} />
         </Routes>
         <PageAgent />
       </div>

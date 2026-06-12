@@ -292,7 +292,7 @@ export function SVGFollower({
       onTouchStart={autoPlay ? undefined : startRecording}
       onTouchEnd={autoPlay ? undefined : stopRecording}
     >
-      <svg ref={svgRef} width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0" />
+      <svg ref={svgRef} width={width} height={height} xmlns="http://www.w3.org/2000/svg" className="absolute inset-0" />
     </div>
   )
 }
