@@ -7,6 +7,7 @@ import { TestPage } from '@/components/features/test/test-page'
 import { AppointmentsPage } from '@/components/features/appointments/appointments-page'
 import { CommunityPage } from '@/components/features/community/community-page'
 import { PostDetail } from '@/components/features/community/post-detail'
+import { ProfilePage } from '@/components/features/profile/profile-page'
 import { ChatPage } from '@/components/features/chat/chat-page'
 import { PageAgent } from '@/components/features/agent/page-agent'
 import { ExpandableTabs } from '@/components/ui/expandable-tabs'
@@ -86,7 +87,7 @@ function NavBar() {
                   </Link>
                 )}
                 <NotificationBell />
-                <span className="text-sm text-fg-secondary mr-2 hidden sm:inline">{user.name}</span>
+                <Link to="/profile" className="text-sm text-fg-secondary mr-2 hidden sm:inline hover:text-accent-sage transition-colors no-underline">{user.name}</Link>
                 <button
                   type="button"
                   onClick={logout}
@@ -211,6 +212,7 @@ function AppLayout() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/library/:id" element={<LibraryDetail />} />
           <Route path="/library/manage" element={<LibraryManage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
         <PageAgent />
       </div>
