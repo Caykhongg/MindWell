@@ -6,6 +6,9 @@ import { initWebSocketServer } from './websocket/index.js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
+import bcrypt from 'bcryptjs';
+import { users } from './db/schema/users.js';
+import { eq } from 'drizzle-orm';
 import type { Server } from 'http';
 
 let server: Server;
@@ -17,6 +20,19 @@ async function runMigrations() {
     logger.info('Running database migrations...');
     await migrate(db, { migrationsFolder: 'src/db/migrations' });
     logger.info('Database migrations complete');
+
+    const existing = await db.select().from(users).where(eq(users.email, 'admin@mindwell.com')).limit(1);
+    if (existing.length === 0) {
+      logger.info('Seeding default accounts...');
+      const passwordHash = (pw: string) => bcrypt.hashSync(pw, config.bcrypt.rounds);
+      await db.insert(users).values([
+        { name: 'Admin', email: 'admin@mindwell.com', passwordHash: passwordHash('Admin123!'), role: 'admin', isActive: true },
+        { name: 'Therapist', email: 'therapist@mindwell.com', passwordHash: passwordHash('Therapist123!'), role: 'therapist', isActive: true },
+        { name: 'Patient', email: 'patient@mindwell.com', passwordHash: passwordHash('Patient123!'), role: 'patient', isActive: true },
+      ]);
+      logger.info('Seed complete');
+    }
+
     await sql.end();
   } catch (err) {
     logger.error({ err }, 'Migration failed, starting server anyway');
