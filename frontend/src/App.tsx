@@ -51,7 +51,9 @@ function NavBar() {
             tabs={navTabs}
             activeColor="text-accent-sage"
             onChange={(index) => {
-              if (index !== null) navigate(tabRoutes[index])
+              if (index === null) return
+              const routeIdx = navTabs.slice(0, index + 1).filter(t => !('type' in t && t.type === 'separator')).length - 1
+              navigate(tabRoutes[routeIdx])
             }}
           />
           <div className="flex items-center gap-2">
