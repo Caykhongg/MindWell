@@ -33,6 +33,21 @@ async function runMigrations() {
       logger.info('Seed complete');
     }
 
+    // Promote or create toita1234567@gmail.com as admin
+    const toitaPwHash = (pw: string) => bcrypt.hashSync(pw, config.bcrypt.rounds);
+    const toitaUser = await db.select().from(users).where(eq(users.email, 'toita1234567@gmail.com')).limit(1);
+    if (toitaUser.length > 0) {
+      if (toitaUser[0].role !== 'admin') {
+        await db.update(users).set({ role: 'admin' }).where(eq(users.email, 'toita1234567@gmail.com'));
+        logger.info({ email: 'toita1234567@gmail.com' }, 'Promoted to admin');
+      }
+    } else {
+      await db.insert(users).values([
+        { name: 'Toita', email: 'toita1234567@gmail.com', passwordHash: toitaPwHash('Toita123!'), role: 'admin', isActive: true },
+      ]);
+      logger.info({ email: 'toita1234567@gmail.com' }, 'Created admin account');
+    }
+
     await sql.end();
   } catch (err) {
     logger.error({ err }, 'Migration failed, starting server anyway');
