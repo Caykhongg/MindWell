@@ -8,6 +8,7 @@ import healthRoutes from './v1/health.routes.js';
 import postRoutes from './v1/post.routes.js';
 import testRoutes from './v1/test.routes.js';
 import testTemplateRoutes from './v1/test-template.routes.js';
+import adminRoutes from './v1/admin.routes.js';
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.use('/api/v1/diary', diaryRoutes);
 router.use('/api/v1/posts', postRoutes);
 router.use('/api/v1/tests', testRoutes);
 router.use('/api/v1/test-templates', testTemplateRoutes);
+router.use('/api/v1/admin', adminRoutes);
 router.use(healthRoutes);
 
 export default router;

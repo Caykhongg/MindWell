@@ -234,24 +234,33 @@ export function SVGFollower({
     animationRef.current = requestAnimationFrame(animate)
   }, [])
 
-  // Fullscreen mode: track mouse via window
+  // Fullscreen mode: track mouse/touch via window
   useEffect(() => {
     if (!autoPlay) return
 
-    const handleGlobalMouseMove = (e: MouseEvent) => {
+    const getPos = (clientX: number, clientY: number): Position | null => {
       const rect = containerRef.current?.getBoundingClientRect()
-      if (!rect) return
+      if (!rect) return null
+      return { x: clientX - rect.left, y: clientY - rect.top }
+    }
 
-      const position: Position = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      }
+    const addPos = (pos: Position | null) => {
+      if (!pos) return
+      followersRef.current.forEach((f) => f.add(pos))
+    }
 
-      followersRef.current.forEach((follower) => follower.add(position))
+    const handleGlobalMouseMove = (e: MouseEvent) => addPos(getPos(e.clientX, e.clientY))
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      if (touch) addPos(getPos(touch.clientX, touch.clientY))
     }
 
     window.addEventListener("mousemove", handleGlobalMouseMove, { passive: true })
-    return () => window.removeEventListener("mousemove", handleGlobalMouseMove)
+    window.addEventListener("touchmove", handleGlobalTouchMove, { passive: true })
+    return () => {
+      window.removeEventListener("mousemove", handleGlobalMouseMove)
+      window.removeEventListener("touchmove", handleGlobalTouchMove)
+    }
   }, [autoPlay])
 
   useEffect(() => {
