@@ -13,6 +13,20 @@ interface Article {
   updated_at: string
 }
 
+function toArticle(m: any): Article {
+  return {
+    id: m.id,
+    author_id: m.authorId ?? m.author_id,
+    title: m.title,
+    content: m.content,
+    category: m.category,
+    status: m.status,
+    tags: m.tags,
+    created_at: m.createdAt ?? m.created_at,
+    updated_at: m.updatedAt ?? m.updated_at,
+  }
+}
+
 const CATEGORIES = ['general', 'lo-au', 'tram-cam', 'stress', 'moi-quan-he', 'cham-soc-ban-than', 'tam-ly-hoc']
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -25,7 +39,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'tam-ly-hoc': 'Tâm lý học',
 }
 
-export function LibraryManage() {
+export function LibraryManage({ embedded }: { embedded?: boolean }) {
   const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -33,8 +47,8 @@ export function LibraryManage() {
 
   const fetchArticles = async () => {
     try {
-      const res = await api.get('library/articles/all').json<{ success: boolean; data: Article[] }>()
-      setArticles(res.data ?? [])
+      const res = await api.get('library/articles/all').json<{ success: boolean; data: any[] }>()
+      setArticles((res.data ?? []).map(toArticle))
     } catch { /* ignore */ }
     setLoading(false)
   }
@@ -71,10 +85,17 @@ export function LibraryManage() {
     } catch { /* ignore */ }
   }
 
+  const Wrapper = embedded ? 'div' : 'main'
+  const wrapperClass = embedded ? '' : 'max-w-4xl mx-auto px-4 py-12'
+
   return (
-    <main className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="font-serif text-2xl text-fg-primary mb-2">Quản lý bài viết</h1>
-      <p className="text-sm text-fg-tertiary mb-8">Đăng bài viết tâm lý cho thư viện cảm xúc</p>
+    <Wrapper className={wrapperClass}>
+      {!embedded && (
+        <>
+          <h1 className="font-serif text-2xl text-fg-primary mb-2">Quản lý bài viết</h1>
+          <p className="text-sm text-fg-tertiary mb-8">Đăng bài viết tâm lý cho thư viện cảm xúc</p>
+        </>
+      )}
 
       <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-surface p-6 mb-8 space-y-4">
         <div>
@@ -165,6 +186,6 @@ export function LibraryManage() {
           ))}
         </div>
       )}
-    </main>
+    </Wrapper>
   )
 }

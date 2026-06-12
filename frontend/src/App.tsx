@@ -128,8 +128,15 @@ function NavBar() {
 
 function HomePage() {
   return (
-    <main className="max-w-6xl mx-auto px-6 py-24">
-      <section className="text-center space-y-8">
+    <main className="max-w-6xl mx-auto px-6 py-24 relative">
+      <SVGFollower
+        className="absolute inset-0 z-0 pointer-events-none"
+        colors={["#a7c957", "#6a9c89", "#45b7d1", "#c9a7eb", "#f4a261"]}
+        autoPlay
+        width="100%"
+        height="100%"
+      />
+      <section className="relative z-10 text-center space-y-8">
         <span className="inline-block rounded-full bg-accent-sage-surface px-5 py-1.5 text-sm text-accent-sage font-medium tracking-wide">
           Dịch vụ Y tế Sinh viên
         </span>
@@ -193,13 +200,6 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen bg-canvas relative">
-      <SVGFollower
-        className="fixed inset-0 z-0 pointer-events-none"
-        colors={["#a7c957", "#6a9c89", "#45b7d1", "#c9a7eb", "#f4a261"]}
-        autoPlay
-        width="100%"
-        height="100%"
-      />
       <div className="relative z-10">
         <NavBar />
         <Routes>
