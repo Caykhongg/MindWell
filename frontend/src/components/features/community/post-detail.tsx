@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { usePost, usePostComments, useCreateComment, useDeletePost, useUpdatePost, useDeleteComment } from '@/hooks/use-posts'
+import { usePost, usePostComments, useCreateComment, useDeletePost, useDeleteComment } from '@/hooks/use-posts'
 import { useLikePost } from '@/hooks/use-posts'
 import { createCommentSchema, type CreateCommentFormData } from '@/lib/post-schemas'
 import { useAuthStore } from '@/stores/auth-store'
@@ -15,7 +15,6 @@ import { Eye, EyeOff, Flag, Edit3 } from 'lucide-react'
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
   const postId = Number(id)
-  const navigate = useNavigate()
   const { isAuthenticated, user } = useAuthStore()
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')

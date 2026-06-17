@@ -25,6 +25,7 @@ function toComment(m: any): Comment {
     post_id: m.postId ?? m.post_id,
     user_id: m.userId ?? m.user_id ?? null,
     content: m.content,
+    is_anonymous: !!(m.isAnonymous ?? m.is_anonymous),
     created_at: m.createdAt ?? m.created_at,
     author: m.author,
     guest_name: m.guestName ?? m.guest_name,
@@ -139,3 +140,12 @@ export function useDeleteComment(postId: number) {
 }
 
 export function useLikePost(postId: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post(`posts/${postId}/like`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['post', postId] })
+      qc.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}

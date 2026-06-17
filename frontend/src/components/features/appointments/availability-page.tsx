@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
-import { Check, X, Plus, Clock } from 'lucide-react'
+import { X, Plus, Clock } from 'lucide-react'
 
 const DAYS_OF_WEEK = ['Thu Hai', 'Thu Ba', 'Thu Tu', 'Thu Nam', 'Thu Sau', 'Thu Bay', 'Chu Nhat']
 
@@ -80,11 +80,18 @@ export function AvailabilityPage() {
         </div>
         <button
           type="button"
-          onClick={() => editing ? setSlots(data?.availability?.map((a: any) => ({
-            dayOfWeek: a.day_of_week,
-            startTime: a.start_time.slice(0, 5),
-            endTime: a.end_time.slice(0, 5),
-          })) ?? []) || setEditing(false) : setEditing(true)}
+          onClick={() => {
+            if (editing) {
+              setSlots(data?.availability?.map((a: any) => ({
+                dayOfWeek: a.day_of_week,
+                startTime: a.start_time.slice(0, 5),
+                endTime: a.end_time.slice(0, 5),
+              })) ?? [])
+              setEditing(false)
+            } else {
+              setEditing(true)
+            }
+          }}
           className="rounded-full border border-border px-4 py-2 text-sm text-fg-secondary hover:bg-surface-hover"
         >
           {editing ? 'Huỷ' : 'Sửa'}

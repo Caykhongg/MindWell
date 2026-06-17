@@ -19,6 +19,7 @@ export const createCommentSchema = z.object({
     .string()
     .min(1, 'Nội dung không được để trống')
     .max(2000, 'Nội dung không được quá 2000 ký tự'),
+  isAnonymous: z.boolean().default(false),
   guestName: z.string().optional(),
   guestEmail: z.string().optional(),
 })
