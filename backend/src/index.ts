@@ -11,9 +11,11 @@ import { users } from './db/schema/users.js';
 import { eq } from 'drizzle-orm';
 import type { Server } from 'http';
 import type { Socket } from 'net';
+import * as readline from 'node:readline';
 
 let server: Server;
 const connections = new Set<Socket>();
+let shuttingDown = false;
 
 async function runMigrations() {
   try {
@@ -70,24 +72,28 @@ runMigrations().then(() => {
 });
 
 function shutdown(signal: string) {
-  logger.info(`Received ${signal}, shutting down gracefully...`);
-  if (!server) process.exit(0);
-  closeWebSocketServer();
-  for (const socket of connections) {
-    socket.destroy();
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.info(`Received ${signal}, shutting down...`);
+  if (server) {
+    closeWebSocketServer();
+    for (const socket of connections) {
+      socket.destroy();
+    }
+    connections.clear();
+    server.close();
   }
-  connections.clear();
-  server.close(async () => {
-    logger.info('HTTP server closed');
-    await closeDatabase();
-    logger.info('Database connections closed');
-    process.exit(0);
-  });
-  setTimeout(() => {
-    logger.error('Forced shutdown after timeout');
-    process.exit(1);
-  }, 3000);
+  closeDatabase().catch(() => {});
+  process.exit(0);
 }
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
+
+if (process.stdin.isTTY) {
+  const rl = readline.createInterface({ input: process.stdin });
+  rl.on('SIGINT', () => {
+    rl.close();
+    shutdown('Ctrl+C');
+  });
+}
