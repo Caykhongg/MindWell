@@ -127,7 +127,7 @@ export function useMarkAsRead() {
   const { markAsRead } = useChatStore()
   return useMutation({
     mutationFn: (convId: number) =>
-      api.post(`chat/conversations/${convId}/read`),
+      api.patch(`chat/conversations/${convId}/read`),
     onSuccess: (_data, convId) => {
       markAsRead(convId)
       qc.invalidateQueries({ queryKey: ['chat', 'conversations'] })

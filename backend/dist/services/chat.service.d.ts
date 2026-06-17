@@ -8,6 +8,20 @@ export declare class ChatService {
         id: number;
         createdAt: Date;
         updatedAt: Date;
+    } | {
+        conversation: {
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        participants: {
+            id: number;
+            userId: number;
+            conversationId: number;
+            joinedAt: Date;
+            lastReadAt: Date;
+        }[];
+        lastMessage: null;
     }>;
     getConversations(userId: number): Promise<{
         conversation: import("../db/schema/conversations.js").Conversation;

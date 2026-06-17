@@ -23,7 +23,8 @@ export class ChatService {
             { conversationId: conversation.id, userId: contactId, joinedAt: new Date(), lastReadAt: new Date() },
         ]);
         logger.info({ conversationId: conversation.id, creatorId, contactId }, 'Conversation created');
-        return conversation;
+        const participants = await this.conversationRepo.findParticipants(conversation.id);
+        return { conversation, participants, lastMessage: null };
     }
     async getConversations(userId) {
         return this.conversationRepo.findByUserId(userId);
