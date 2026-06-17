@@ -18,6 +18,8 @@ export function CommentCard({ comment, onDelete, isDeletePending, postId }: Comm
   const { user } = useAuthStore()
   const updateComment = useUpdateComment(postId)
   const isOwner = user?.id && comment.user_id && user.id === comment.user_id
+  const isAdmin = user?.role === 'admin'
+  const canManage = isOwner || isAdmin
   const date = new Date(comment.created_at).toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: 'long',
@@ -70,9 +72,9 @@ export function CommentCard({ comment, onDelete, isDeletePending, postId }: Comm
           )}
         </div>
 
-        {isOwner && (
+        {canManage && (
           <div className="shrink-0 flex items-center gap-1">
-            {!editing && (
+            {isOwner && !editing && (
               <button type="button" onClick={() => setEditing(true)}
                 className="text-fg-tertiary hover:text-accent-sage transition-colors p-1 rounded"
                 aria-label="Chỉnh sửa bình luận">

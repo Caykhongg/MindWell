@@ -22,7 +22,7 @@ export function ReportModal({ postId, open, onClose }: ReportModalProps) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['reports'] })
       setReason('')
-      onClose()
+      setTimeout(onClose, 1500)
     },
   })
 
@@ -89,6 +89,9 @@ export function ReportModal({ postId, open, onClose }: ReportModalProps) {
 
         {reportMutation.isSuccess && (
           <p className="text-xs text-accent-sage mt-3 text-center">Đã gửi tố cáo. Cảm ơn bạn!</p>
+        )}
+        {reportMutation.isError && (
+          <p className="text-xs text-crisis mt-3 text-center">Gửi thất bại. Vui lòng thử lại.</p>
         )}
       </div>
     </div>

@@ -25,6 +25,7 @@ export function PostActions({
   const [confirming, setConfirming] = useState(false)
   const { user } = useAuthStore()
   const isOwner = !!(user?.id && userId && user.id === userId)
+  const isAdmin = user?.role === 'admin'
 
   return (
     <div className="flex items-center gap-3">
@@ -51,7 +52,7 @@ export function PostActions({
         <span>{likeCount}</span>
       </button>
 
-      {isOwner && (
+      {(isOwner || isAdmin) && (
         <div className="relative">
           {confirming ? (
             <div className="flex items-center gap-1">

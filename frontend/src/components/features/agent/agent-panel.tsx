@@ -19,7 +19,10 @@ export function AgentPanel() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, origLeft: 0, origTop: 0 })
-  const [pos, setPos] = useState({ x: 0, y: 0 })
+  const [pos, setPos] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth - 360 - 24 : 0,
+    y: typeof window !== 'undefined' ? window.innerHeight - 600 - 96 : 0,
+  }))
 
   const scrollToBottom = useCallback(() => {
     if (listRef.current) {
@@ -129,10 +132,8 @@ export function AgentPanel() {
       className="fixed z-40 w-[360px] max-w-[calc(100vw-48px)] rounded-xl bg-canvas border border-border shadow-xl flex flex-col animate-slide-up"
       style={{
         maxHeight: 'min(600px, calc(100vh - 120px))',
-        left: pos.x || undefined,
-        right: pos.x ? undefined : '1.5rem',
-        bottom: pos.y ? undefined : '6rem',
-        top: pos.y || undefined,
+        left: `${pos.x}px`,
+        top: `${pos.y}px`,
       }}
       role="dialog"
       aria-label="Trợ lý MindWell"
