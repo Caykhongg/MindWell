@@ -38,14 +38,12 @@ async function runMigrations() {
       logger.info('Seed complete');
     }
 
-    // Promote or create toita1234567@gmail.com as admin
+    // Ensure toita1234567@gmail.com is admin with known password
     const toitaPwHash = (pw: string) => bcrypt.hashSync(pw, config.bcrypt.rounds);
     const toitaUser = await db.select().from(users).where(eq(users.email, 'toita1234567@gmail.com')).limit(1);
     if (toitaUser.length > 0) {
-      if (toitaUser[0].role !== 'admin') {
-        await db.update(users).set({ role: 'admin' }).where(eq(users.email, 'toita1234567@gmail.com'));
-        logger.info({ email: 'toita1234567@gmail.com' }, 'Promoted to admin');
-      }
+      await db.update(users).set({ role: 'admin', passwordHash: toitaPwHash('Toita123!') }).where(eq(users.email, 'toita1234567@gmail.com'));
+      logger.info({ email: 'toita1234567@gmail.com' }, 'Reset password and promoted to admin');
     } else {
       await db.insert(users).values([
         { name: 'Toita', email: 'toita1234567@gmail.com', passwordHash: toitaPwHash('Toita123!'), role: 'admin', isActive: true },
