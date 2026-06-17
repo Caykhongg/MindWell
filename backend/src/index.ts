@@ -2,7 +2,7 @@ import app from './app.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
 import { closeDatabase } from './config/database.js';
-import { initWebSocketServer } from './websocket/index.js';
+import { initWebSocketServer, closeWebSocketServer } from './websocket/index.js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -10,8 +10,10 @@ import bcrypt from 'bcryptjs';
 import { users } from './db/schema/users.js';
 import { eq } from 'drizzle-orm';
 import type { Server } from 'http';
+import type { Socket } from 'net';
 
 let server: Server;
+const connections = new Set<Socket>();
 
 async function runMigrations() {
   try {
@@ -59,12 +61,22 @@ runMigrations().then(() => {
     logger.info(`MindWell API running on port ${config.port} [${config.nodeEnv}]`);
   });
 
+  server.on('connection', (socket: Socket) => {
+    connections.add(socket);
+    socket.on('close', () => connections.delete(socket));
+  });
+
   initWebSocketServer(server);
 });
 
 function shutdown(signal: string) {
   logger.info(`Received ${signal}, shutting down gracefully...`);
   if (!server) process.exit(0);
+  closeWebSocketServer();
+  for (const socket of connections) {
+    socket.destroy();
+  }
+  connections.clear();
   server.close(async () => {
     logger.info('HTTP server closed');
     await closeDatabase();
@@ -74,7 +86,7 @@ function shutdown(signal: string) {
   setTimeout(() => {
     logger.error('Forced shutdown after timeout');
     process.exit(1);
-  }, 30000);
+  }, 3000);
 }
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));

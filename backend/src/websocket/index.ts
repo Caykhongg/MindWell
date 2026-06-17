@@ -14,6 +14,9 @@ import { setRoomManager } from './registry.js';
 const HEARTBEAT_INTERVAL = 30000;
 const HEARTBEAT_TIMEOUT = 60000;
 
+let _wss: WebSocketServer | null = null;
+let _heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+
 interface AuthenticatedSocket extends WebSocket {
   userId?: number;
   isAlive?: boolean;
@@ -23,11 +26,12 @@ const messageRepo = new MessageRepository();
 const conversationRepo = new ConversationRepository();
 
 export function initWebSocketServer(httpServer: HttpServer): RoomManager {
-  const wss = new WebSocketServer({ server: httpServer });
+  _wss = new WebSocketServer({ server: httpServer });
   const roomManager = new RoomManager();
 
-  const heartbeatTimer = setInterval(() => {
-    wss.clients.forEach((ws) => {
+  _heartbeatTimer = setInterval(() => {
+    if (!_wss) return;
+    _wss.clients.forEach((ws) => {
       const socket = ws as AuthenticatedSocket;
       if (!socket.isAlive) {
         logger.info({ userId: socket.userId }, 'WS heartbeat timeout, disconnecting');
@@ -38,11 +42,11 @@ export function initWebSocketServer(httpServer: HttpServer): RoomManager {
     });
   }, HEARTBEAT_INTERVAL);
 
-  wss.on('close', () => {
-    clearInterval(heartbeatTimer);
+  _wss.on('close', () => {
+    if (_heartbeatTimer) clearInterval(_heartbeatTimer);
   });
 
-  wss.on('connection', (ws: WebSocket, req) => {
+  _wss.on('connection', (ws: WebSocket, req) => {
     const socket = ws as AuthenticatedSocket;
     socket.isAlive = true;
 
@@ -150,4 +154,16 @@ export function initWebSocketServer(httpServer: HttpServer): RoomManager {
   setRoomManager(roomManager);
   logger.info('WebSocket server initialized');
   return roomManager;
+}
+
+export function closeWebSocketServer(): void {
+  if (_heartbeatTimer) {
+    clearInterval(_heartbeatTimer);
+    _heartbeatTimer = null;
+  }
+  if (_wss) {
+    _wss.clients.forEach((client) => client.terminate());
+    _wss.close();
+    _wss = null;
+  }
 }
