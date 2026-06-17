@@ -19,7 +19,8 @@ export function reportController(reportService: ReportService) {
 
     resolve: asyncHandler(async (req: AuthRequest, res: Response) => {
       const id = parseInt(req.params.id as string, 10);
-      const result = await reportService.resolve(id);
+      const { action } = req.body;
+      const result = await reportService.resolve(id, action || 'dismiss');
       res.json(success(result));
     }),
   };

@@ -1,8 +1,10 @@
 import { db } from '../config/database.js';
 import { reports } from '../db/schema/reports.js';
+import { notifications } from '../db/schema/notifications.js';
+import { posts } from '../db/schema/posts.js';
 import { NotificationService } from './notification.service.js';
 import { users } from '../db/schema/users.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { logger } from '../utils/logger.js';
 
 const notifService = new NotificationService();
@@ -34,8 +36,43 @@ export class ReportService {
     return db.select().from(reports).orderBy(reports.createdAt);
   }
 
-  async resolve(id: number) {
-    const result = await db.update(reports).set({ isResolved: true }).where(eq(reports.id, id)).returning();
-    return result[0];
+  async resolve(id: number, action: 'delete' | 'dismiss') {
+    const [report] = await db.update(reports).set({ isResolved: true }).where(eq(reports.id, id)).returning();
+    if (!report) return null;
+
+    // Mark admin notifications about this report as read
+    const notifs = await db.select().from(notifications).where(and(eq(notifications.type, 'report'), eq(notifications.relatedId, report.postId)));
+    for (const n of notifs) {
+      await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, n.id));
+    }
+
+    // Notify the reporter
+    await notifService.create({
+      userId: report.reporterId,
+      type: 'report_resolved',
+      title: action === 'delete' ? 'Bài viết đã bị xoá' : 'Tố cáo đã được xem xét',
+      message: action === 'delete'
+        ? `Bài viết #${report.postId} đã bị xoá do vi phạm quy định.`
+        : `Tố cáo bài viết #${report.postId} đã được xem xét và không cần xử lý thêm.`,
+      relatedId: report.postId,
+    });
+
+    // If delete action, remove the post and notify the original poster
+    if (action === 'delete') {
+      const [post] = await db.select().from(posts).where(eq(posts.id, report.postId)).limit(1);
+      await db.delete(posts).where(eq(posts.id, report.postId));
+      if (post?.userId) {
+        await notifService.create({
+          userId: post.userId,
+          type: 'post_deleted',
+          title: 'Bài viết của bạn đã bị xoá',
+          message: `Bài viết "${post.title}" đã bị xoá do vi phạm quy định cộng đồng.`,
+          relatedId: report.postId,
+        });
+      }
+    }
+
+    logger.info({ reportId: id, action }, 'Report resolved');
+    return report;
   }
 }

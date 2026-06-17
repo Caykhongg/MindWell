@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
 import { useNavigate } from 'react-router-dom'
-import { Flag, Check, ExternalLink } from 'lucide-react'
+import { Flag, ExternalLink } from 'lucide-react'
 
 interface Report {
   id: number
@@ -31,8 +31,8 @@ export function ReportManagePage() {
   })
 
   const resolveMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await api.patch(`reports/${id}/resolve`)
+    mutationFn: async ({ id, action }: { id: number; action: 'delete' | 'dismiss' }) => {
+      await api.patch(`reports/${id}/resolve`, { json: { action } })
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['reports'] }),
   })
@@ -91,11 +91,18 @@ export function ReportManagePage() {
                     <ExternalLink size={12} /> Xem bài
                   </button>
                   {!r.isResolved && (
-                    <button type="button" onClick={() => resolveMutation.mutate(r.id)}
-                      disabled={resolveMutation.isPending}
-                      className="rounded-full bg-accent-sage text-white px-3 py-1.5 text-xs hover:bg-accent-sage/90 disabled:opacity-50 flex items-center gap-1">
-                      <Check size={12} /> Đã xử lý
-                    </button>
+                    <div className="flex gap-1">
+                      <button type="button" onClick={() => resolveMutation.mutate({ id: r.id, action: 'dismiss' })}
+                        disabled={resolveMutation.isPending}
+                        className="rounded-full border border-border px-2.5 py-1.5 text-xs text-fg-secondary hover:bg-surface-hover disabled:opacity-50">
+                        Bỏ qua
+                      </button>
+                      <button type="button" onClick={() => { if (window.confirm('Xoá bài viết này?')) resolveMutation.mutate({ id: r.id, action: 'delete' }) }}
+                        disabled={resolveMutation.isPending}
+                        className="rounded-full bg-crisis text-white px-2.5 py-1.5 text-xs hover:bg-crisis/90 disabled:opacity-50 flex items-center gap-1">
+                        Xoá & Xử lý
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
