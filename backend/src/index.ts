@@ -8,7 +8,8 @@ import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import bcrypt from 'bcryptjs';
 import { users } from './db/schema/users.js';
-import { eq } from 'drizzle-orm';
+import { posts, comments } from './db/schema/posts.js';
+import { count, eq } from 'drizzle-orm';
 import type { Server } from 'http';
 import type { Socket } from 'net';
 import * as readline from 'node:readline';
@@ -50,6 +51,27 @@ async function runMigrations() {
         { name: 'Toita', email: 'toita1234567@gmail.com', passwordHash: toitaPwHash('Toita123!'), role: 'admin', isActive: true },
       ]);
       logger.info({ email: 'toita1234567@gmail.com' }, 'Created admin account');
+    }
+
+    // Seed sample post + comment if no posts exist
+    const [postCount] = await db.select({ total: count() }).from(posts);
+    if (postCount.total === 0) {
+      const adminUser = await db.select().from(users).where(eq(users.email, 'admin@mindwell.com')).limit(1);
+      if (adminUser.length > 0) {
+        const [post] = await db.insert(posts).values({
+          userId: adminUser[0].id,
+          title: 'Chào mừng bạn đến với MindWell!',
+          content: 'Đây là bài viết mẫu. Hãy chia sẻ cảm xúc của bạn và kết nối với cộng đồng nhé!',
+          isAnonymous: 0,
+        }).returning();
+        await db.insert(comments).values({
+          postId: post.id,
+          userId: adminUser[0].id,
+          content: 'Chào mừng bạn! Hy vọng bạn sẽ tìm thấy sự hỗ trợ tại đây.',
+          isAnonymous: 0,
+        });
+        logger.info('Sample post and comment seeded');
+      }
     }
 
     await sql.end();

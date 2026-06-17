@@ -1,28 +1,44 @@
-import { eq, desc, count, and, sql } from 'drizzle-orm';
+import { eq, desc, count, and, sql, getTableColumns } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { posts, postLikes, comments, } from '../db/schema/posts.js';
+import { users } from '../db/schema/users.js';
+const postWithAuthor = {
+    ...getTableColumns(posts),
+    author: { id: users.id, name: users.name, avatar_url: users.avatarUrl },
+};
+const commentWithAuthor = {
+    ...getTableColumns(comments),
+    author: { id: users.id, name: users.name, avatar_url: users.avatarUrl },
+};
 export class PostRepository {
     async findAll(page, limit) {
         const offset = (page - 1) * limit;
         const [total] = await db.select({ total: count() }).from(posts);
         const entries = await db
-            .select()
+            .select(postWithAuthor)
             .from(posts)
+            .leftJoin(users, eq(posts.userId, users.id))
             .orderBy(desc(posts.createdAt))
             .limit(limit)
             .offset(offset);
         return { entries, total: total.total };
     }
     async findById(id) {
-        const result = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
+        const result = await db
+            .select(postWithAuthor)
+            .from(posts)
+            .leftJoin(users, eq(posts.userId, users.id))
+            .where(eq(posts.id, id))
+            .limit(1);
         return result[0];
     }
     async findByUserId(userId, page, limit) {
         const offset = (page - 1) * limit;
         const [total] = await db.select({ total: count() }).from(posts).where(eq(posts.userId, userId));
         const entries = await db
-            .select()
+            .select(postWithAuthor)
             .from(posts)
+            .leftJoin(users, eq(posts.userId, users.id))
             .where(eq(posts.userId, userId))
             .orderBy(desc(posts.createdAt))
             .limit(limit)
@@ -91,8 +107,9 @@ export class CommentRepository {
         const offset = (page - 1) * limit;
         const [total] = await db.select({ total: count() }).from(comments).where(eq(comments.postId, postId));
         const entries = await db
-            .select()
+            .select(commentWithAuthor)
             .from(comments)
+            .leftJoin(users, eq(comments.userId, users.id))
             .where(eq(comments.postId, postId))
             .orderBy(desc(comments.createdAt))
             .limit(limit)
@@ -100,7 +117,12 @@ export class CommentRepository {
         return { entries, total: total.total };
     }
     async findById(id) {
-        const result = await db.select().from(comments).where(eq(comments.id, id)).limit(1);
+        const result = await db
+            .select(commentWithAuthor)
+            .from(comments)
+            .leftJoin(users, eq(comments.userId, users.id))
+            .where(eq(comments.id, id))
+            .limit(1);
         return result[0];
     }
     async create(data) {

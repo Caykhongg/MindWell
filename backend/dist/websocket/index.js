@@ -11,13 +11,17 @@ import { logger } from '../utils/logger.js';
 import { setRoomManager } from './registry.js';
 const HEARTBEAT_INTERVAL = 30000;
 const HEARTBEAT_TIMEOUT = 60000;
+let _wss = null;
+let _heartbeatTimer = null;
 const messageRepo = new MessageRepository();
 const conversationRepo = new ConversationRepository();
 export function initWebSocketServer(httpServer) {
-    const wss = new WebSocketServer({ server: httpServer });
+    _wss = new WebSocketServer({ server: httpServer });
     const roomManager = new RoomManager();
-    const heartbeatTimer = setInterval(() => {
-        wss.clients.forEach((ws) => {
+    _heartbeatTimer = setInterval(() => {
+        if (!_wss)
+            return;
+        _wss.clients.forEach((ws) => {
             const socket = ws;
             if (!socket.isAlive) {
                 logger.info({ userId: socket.userId }, 'WS heartbeat timeout, disconnecting');
@@ -27,10 +31,11 @@ export function initWebSocketServer(httpServer) {
             socket.ping();
         });
     }, HEARTBEAT_INTERVAL);
-    wss.on('close', () => {
-        clearInterval(heartbeatTimer);
+    _wss.on('close', () => {
+        if (_heartbeatTimer)
+            clearInterval(_heartbeatTimer);
     });
-    wss.on('connection', (ws, req) => {
+    _wss.on('connection', (ws, req) => {
         const socket = ws;
         socket.isAlive = true;
         const cookie = req.headers.cookie || '';
@@ -119,5 +124,16 @@ export function initWebSocketServer(httpServer) {
     setRoomManager(roomManager);
     logger.info('WebSocket server initialized');
     return roomManager;
+}
+export function closeWebSocketServer() {
+    if (_heartbeatTimer) {
+        clearInterval(_heartbeatTimer);
+        _heartbeatTimer = null;
+    }
+    if (_wss) {
+        _wss.clients.forEach((client) => client.terminate());
+        _wss.close();
+        _wss = null;
+    }
 }
 //# sourceMappingURL=index.js.map

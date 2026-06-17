@@ -1,1 +1,1 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/websocket/index.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,MAAM,IAAI,UAAU,EAAE,MAAM,MAAM,CAAC;AAIjD,OAAO,EAAE,WAAW,EAAE,MAAM,YAAY,CAAC;AAoBzC,wBAAgB,mBAAmB,CAAC,UAAU,EAAE,UAAU,GAAG,WAAW,CAgIvE"}
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/websocket/index.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,MAAM,IAAI,UAAU,EAAE,MAAM,MAAM,CAAC;AAIjD,OAAO,EAAE,WAAW,EAAE,MAAM,YAAY,CAAC;AAuBzC,wBAAgB,mBAAmB,CAAC,UAAU,EAAE,UAAU,GAAG,WAAW,CAiIvE;AAED,wBAAgB,oBAAoB,IAAI,IAAI,CAU3C"}
