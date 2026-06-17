@@ -4,6 +4,7 @@ import { AgentMessage, TypingDots } from './agent-message'
 import { AgentQuickActions } from './agent-quick-actions'
 import { QUICK_ACTIONS, PREDEFINED_REPLIES, getBotReply } from './agent-data'
 import type { QuickAction, AgentMessage as AgentMessageType } from '@/types'
+import { GripHorizontal } from 'lucide-react'
 
 let msgIdCounter = 0
 function nextId() {
@@ -16,6 +17,9 @@ export function AgentPanel() {
   const [input, setInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, origLeft: 0, origTop: 0 })
+  const [pos, setPos] = useState({ x: 0, y: 0 })
 
   const scrollToBottom = useCallback(() => {
     if (listRef.current) {
@@ -26,6 +30,39 @@ export function AgentPanel() {
   useEffect(() => {
     scrollToBottom()
   }, [messages, isLoading, scrollToBottom])
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    const panel = panelRef.current
+    if (!panel) return
+    const rect = panel.getBoundingClientRect()
+    dragRef.current = {
+      isDragging: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      origLeft: rect.left,
+      origTop: rect.top,
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const d = dragRef.current
+      if (!d.isDragging) return
+      const dx = e.clientX - d.startX
+      const dy = e.clientY - d.startY
+      setPos({ x: d.origLeft + dx, y: d.origTop + dy })
+    }
+    const handleMouseUp = () => {
+      dragRef.current.isDragging = false
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
 
   const addBotReply = useCallback((text: string) => {
     const msg: AgentMessageType = {
@@ -52,9 +89,7 @@ export function AgentPanel() {
     setLoading(true)
 
     const keywordReply = getBotReply(trimmed)
-
     await new Promise((r) => setTimeout(r, 600 + Math.random() * 600))
-
     addBotReply(keywordReply)
     setLoading(false)
   }, [addMessage, setLoading, addBotReply])
@@ -90,13 +125,24 @@ export function AgentPanel() {
 
   return (
     <div
-      className="fixed bottom-24 right-6 z-40 w-[360px] max-w-[calc(100vw-48px)] rounded-xl bg-canvas border border-border shadow-xl flex flex-col animate-slide-up"
-      style={{ maxHeight: 'min(600px, calc(100vh - 120px))' }}
+      ref={panelRef}
+      className="fixed z-40 w-[360px] max-w-[calc(100vw-48px)] rounded-xl bg-canvas border border-border shadow-xl flex flex-col animate-slide-up"
+      style={{
+        maxHeight: 'min(600px, calc(100vh - 120px))',
+        left: pos.x || undefined,
+        right: pos.x ? undefined : '1.5rem',
+        bottom: pos.y ? undefined : '6rem',
+        top: pos.y || undefined,
+      }}
       role="dialog"
       aria-label="Trợ lý MindWell"
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+      <div
+        onMouseDown={handleDragStart}
+        className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0 cursor-grab active:cursor-grabbing select-none"
+      >
         <div className="flex items-center gap-2">
+          <GripHorizontal size={14} className="text-fg-tertiary" />
           <span className="text-lg">🌿</span>
           <span className="text-sm font-medium text-fg-primary">Trợ lý MindWell</span>
         </div>

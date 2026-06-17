@@ -140,6 +140,15 @@ export class CommentRepository {
     return result[0];
   }
 
+  async update(id: number, data: Partial<NewComment>): Promise<Comment | undefined> {
+    const result = await db
+      .update(comments)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(comments.id, id))
+      .returning();
+    return result[0];
+  }
+
   async delete(id: number): Promise<void> {
     await db.delete(comments).where(eq(comments.id, id));
   }

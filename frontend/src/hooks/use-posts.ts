@@ -82,6 +82,20 @@ export function useDeletePost() {
   })
 }
 
+export function useUpdatePost() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<CreatePostFormData> }) => {
+      const res = await api.put(`posts/${id}`, { json: data }).json<{ success: boolean; data: any }>()
+      return toPost(res.data)
+    },
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['post', variables.id] })
+      qc.invalidateQueries({ queryKey: ['posts'] })
+    },
+  })
+}
+
 export function useCreateComment(postId: number) {
   const qc = useQueryClient()
   return useMutation({
@@ -97,13 +111,31 @@ export function useCreateComment(postId: number) {
   })
 }
 
-export function useLikePost(postId: number) {
+export function useUpdateComment(postId: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => api.post(`posts/${postId}/like`),
+    mutationFn: async ({ commentId, data }: { commentId: number; data: { content: string; isAnonymous?: boolean } }) => {
+      const res = await api.put(`posts/${postId}/comments/${commentId}`, { json: data }).json<{ success: boolean; data: Comment }>()
+      return res.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['post', postId, 'comments'] })
+    },
+  })
+}
+
+export function useDeleteComment(postId: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (commentId: number) => {
+      await api.delete(`posts/${postId}/comments/${commentId}`)
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['post', postId] })
+      qc.invalidateQueries({ queryKey: ['post', postId, 'comments'] })
       qc.invalidateQueries({ queryKey: ['posts'] })
     },
   })
 }
+
+export function useLikePost(postId: number) {

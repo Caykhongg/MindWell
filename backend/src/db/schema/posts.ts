@@ -29,6 +29,7 @@ export const comments = pgTable('comments', {
   postId: integer('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
   userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
+  isAnonymous: integer('is_anonymous').notNull().$default(() => 0),
   guestName: varchar('guest_name', { length: 100 }),
   guestEmail: varchar('guest_email', { length: 255 }),
   createdAt: timestamp('created_at').notNull().$default(() => new Date()),

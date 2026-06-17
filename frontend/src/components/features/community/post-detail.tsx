@@ -1,26 +1,32 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { usePost, usePostComments, useCreateComment, useDeletePost } from '@/hooks/use-posts'
+import { usePost, usePostComments, useCreateComment, useDeletePost, useUpdatePost, useDeleteComment } from '@/hooks/use-posts'
 import { useLikePost } from '@/hooks/use-posts'
 import { createCommentSchema, type CreateCommentFormData } from '@/lib/post-schemas'
 import { useAuthStore } from '@/stores/auth-store'
 import { PostActions } from './post-actions'
 import { CommentCard } from './comment-card'
+import { ReportModal } from './report-modal'
+import { Eye, EyeOff, Flag, Edit3 } from 'lucide-react'
 
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>()
   const postId = Number(id)
-  const { isAuthenticated } = useAuthStore()
+  const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuthStore()
   const [guestName, setGuestName] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
+  const [commentAnonymous, setCommentAnonymous] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
 
   const { data: post, isLoading, isError, error } = usePost(postId)
   const { data: commentsData, isLoading: commentsLoading, isError: commentsError } = usePostComments(postId)
   const createCommentMutation = useCreateComment(postId)
   const deletePostMutation = useDeletePost()
+  const deleteCommentMutation = useDeleteComment(postId)
   const likeMutation = useLikePost(postId)
 
   const {
@@ -84,6 +90,7 @@ export function PostDetail() {
   const handleCommentSubmit = async (data: CreateCommentFormData) => {
     await createCommentMutation.mutateAsync({
       ...data,
+      isAnonymous: commentAnonymous,
       guestName: isAuthenticated ? undefined : guestName,
       guestEmail: isAuthenticated ? undefined : guestEmail,
     })
@@ -136,6 +143,25 @@ export function PostDetail() {
             isLikePending={likeMutation.isPending}
             isDeletePending={deletePostMutation.isPending}
           />
+          <div className="flex items-center gap-2 mt-3">
+            {user?.id && post.user_id === user.id && (
+              <Link
+                to={`/community/${post.id}/edit`}
+                className="inline-flex items-center gap-1 text-xs text-accent-sage hover:text-accent-sage/80 transition-colors no-underline"
+              >
+                <Edit3 size={12} />
+                Chỉnh sửa
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => setReportOpen(true)}
+              className="inline-flex items-center gap-1 text-xs text-fg-tertiary hover:text-crisis transition-colors"
+            >
+              <Flag size={12} />
+              Tố cáo
+            </button>
+          </div>
         </div>
       </article>
 
@@ -180,6 +206,21 @@ export function PostDetail() {
                   </p>
                 )}
               </div>
+              {isAuthenticated && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => setCommentAnonymous(!commentAnonymous)}
+                    className={`rounded-lg p-1.5 transition-colors ${commentAnonymous ? 'bg-accent-sage text-white' : 'bg-surface text-fg-tertiary hover:text-fg-secondary'}`}
+                    aria-label={commentAnonymous ? 'Bình luận ẩn danh' : 'Bình luận công khai'}
+                  >
+                    {commentAnonymous ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <span className="text-xs text-fg-secondary">
+                    {commentAnonymous ? 'Bình luận ẩn danh' : 'Bình luận công khai'}
+                  </span>
+                </label>
+              )}
               <button
                 type="submit"
                 disabled={createCommentMutation.isPending}
@@ -215,15 +256,16 @@ export function PostDetail() {
             {commentsData.comments.map((comment) => (
               <CommentCard
                 key={comment.id}
+                postId={postId}
                 comment={comment}
-                onDelete={(_commentId) => {
-                  // deleteComment mutation would go here when API supports it
-                }}
+                onDelete={(cid) => deleteCommentMutation.mutate(cid)}
+                isDeletePending={deleteCommentMutation.isPending}
               />
             ))}
           </div>
         )}
       </section>
+      <ReportModal postId={postId} open={reportOpen} onClose={() => setReportOpen(false)} />
     </main>
   )
 }

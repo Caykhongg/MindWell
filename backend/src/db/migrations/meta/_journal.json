@@ -43,6 +43,27 @@
       "when": 1781528841614,
       "tag": "0005_sudden_blazing_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781670776638,
+      "tag": "0006_past_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781670933043,
+      "tag": "0007_mean_caretaker",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781671314503,
+      "tag": "0008_exotic_mephistopheles",
+      "breakpoints": true
     }
   ]
 }

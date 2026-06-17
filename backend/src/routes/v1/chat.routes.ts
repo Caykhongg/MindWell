@@ -25,5 +25,6 @@ router.get('/conversations/:id', authenticate, controller.convDetail);
 router.get('/conversations/:id/messages', authenticate, controller.messageList);
 router.post('/conversations/:id/messages', authenticate, validate(sendMessageSchema), controller.sendMessage);
 router.patch('/conversations/:id/read', authenticate, validate(markReadSchema), controller.markRead);
+router.get('/users/search', authenticate, controller.searchUsers);
 
 export default router;

@@ -27,5 +27,6 @@ router.post('/:id/like', authenticate, controller.toggleLike);
 router.get('/:id/comments', controller.listComments);
 router.post('/:id/comments', validate(createCommentSchema), controller.createComment);
 router.delete('/:id/comments/:commentId', authenticate, controller.deleteComment);
+router.put('/:id/comments/:commentId', authenticate, controller.updateComment);
 
 export default router;

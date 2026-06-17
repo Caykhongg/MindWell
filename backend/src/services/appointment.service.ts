@@ -4,6 +4,7 @@ import { AppointmentRepository } from '../repositories/appointment.repository.js
 import { NotFoundError, ForbiddenError, ConflictError } from '../utils/errors.js';
 import { NotificationService } from './notification.service.js';
 import { users } from '../db/schema/users.js';
+import { counselorAvailability } from '../db/schema/counselor-availability.js';
 import { logger } from '../utils/logger.js';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -46,25 +47,31 @@ export class AppointmentService {
     const conflict = await this.appointmentRepo.findConflicting(appointmentDate, userId);
     if (conflict) throw new ConflictError('Bạn đã có lịch hẹn vào khung giờ này');
 
-    // Auto-assign random active therapist (active within last 2 days)
-    const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-    const activeTherapists = await db
+    const dayNames = ['Chu Nhat', 'Thu Hai', 'Thu Ba', 'Thu Tu', 'Thu Nam', 'Thu Sau', 'Thu Bay'];
+    const dayOfWeek = dayNames[appointmentDate.getDay()];
+    const timeStr = appointmentDate.toTimeString().slice(0, 5);
+
+    const availableTherapists = await db
       .select({ id: users.id, name: users.name })
       .from(users)
+      .innerJoin(counselorAvailability, eq(users.id, counselorAvailability.counselorId))
       .where(
         and(
           eq(users.role, 'therapist'),
           eq(users.isActive, true),
-          gt(users.updatedAt, twoDaysAgo)
+          eq(counselorAvailability.dayOfWeek, dayOfWeek),
+          eq(counselorAvailability.isAvailable, true),
+          sql`${counselorAvailability.startTime} <= ${timeStr}::time`,
+          sql`${counselorAvailability.endTime} >= ${timeStr}::time`
         )
       );
 
     let therapistId: number | null = null;
     let therapistName: string | undefined;
-    if (activeTherapists.length > 0) {
-      const randomIndex = Math.floor(Math.random() * activeTherapists.length);
-      therapistId = activeTherapists[randomIndex].id;
-      therapistName = activeTherapists[randomIndex].name;
+    if (availableTherapists.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableTherapists.length);
+      therapistId = availableTherapists[randomIndex].id;
+      therapistName = availableTherapists[randomIndex].name;
     }
 
     const appointment = await this.appointmentRepo.create({

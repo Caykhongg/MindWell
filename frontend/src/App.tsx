@@ -13,11 +13,14 @@ import { ChatPage } from '@/components/features/chat/chat-page'
 import { PageAgent } from '@/components/features/agent/page-agent'
 import { ExpandableTabs } from '@/components/ui/expandable-tabs'
 import { SVGFollower } from '@/components/ui/svg-follower'
-import { BookOpen, ClipboardCheck, Users, Calendar, MessageCircle, Home, PlusCircle, UserCog, Library } from 'lucide-react'
+import { BookOpen, ClipboardCheck, Users, Calendar, MessageCircle, Home, PlusCircle, UserCog, Library, Flag } from 'lucide-react'
 import { RoleRequestPage } from '@/components/features/auth/role-request'
 import { LibraryPage } from '@/components/features/library/library-page'
 import { LibraryDetail } from '@/components/features/library/library-detail'
 import { LibraryManage } from '@/components/features/library/library-manage'
+import { AvailabilityPage } from '@/components/features/appointments/availability-page'
+import { ReportManagePage } from '@/components/features/community/report-manage-page'
+import { PostEdit } from '@/components/features/community/post-edit'
 import { NotificationBell } from '@/components/features/notifications/notification-bell'
 import type { LucideIcon } from 'lucide-react'
 
@@ -80,6 +83,15 @@ function NavBar() {
                     Làm tư vấn viên
                   </Link>
                 )}
+                {(role === 'therapist' || role === 'admin') && (
+                  <Link
+                    to="/availability"
+                    className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
+                  >
+                    <Calendar size={14} />
+                    Lịch rảnh
+                  </Link>
+                )}
                 {role === 'admin' && (
                   <Link
                     to="/role-request"
@@ -87,6 +99,15 @@ function NavBar() {
                   >
                     <UserCog size={14} />
                     Quản lý yêu cầu
+                  </Link>
+                )}
+                {role === 'admin' && (
+                  <Link
+                    to="/admin/reports"
+                    className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-crisis font-medium hover:bg-crisis-surface transition-colors no-underline"
+                  >
+                    <Flag size={14} />
+                    Tố cáo
                   </Link>
                 )}
                 <NotificationBell />
@@ -216,6 +237,9 @@ function AppLayout() {
           <Route path="/library/:id" element={<LibraryDetail />} />
           <Route path="/library/manage" element={<LibraryManage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/availability" element={<AvailabilityPage />} />
+          <Route path="/admin/reports" element={<ReportManagePage />} />
+          <Route path="/community/:id/edit" element={<PostEdit />} />
         </Routes>
         <PageAgent />
       </div>

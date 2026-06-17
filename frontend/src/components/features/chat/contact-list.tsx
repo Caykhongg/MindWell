@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useChatStore } from '@/stores/chat-store'
-import { useConversations, useTherapists, useCreateConversation } from '@/hooks/use-chat'
+import { useConversations, useTherapists, useCreateConversation, useSearchUsers } from '@/hooks/use-chat'
 import { ContactItem } from './contact-item'
 
 interface ContactListProps {
@@ -36,8 +36,10 @@ export function ContactList({ onSelectConversation }: ContactListProps) {
   const { isLoading, isError, error, refetch } = useConversations()
   const therapistsQuery = useTherapists()
   const createConv = useCreateConversation()
+  const searchQuery = useSearchUsers(search)
 
   const therapists = therapistsQuery.data ?? []
+  const searchResults = searchQuery.data ?? []
   const existingContactIds = new Set(
     conversations.map(c => c.participants?.find(p => p.id !== currentUser?.id)?.id).filter(Boolean)
   )
@@ -49,12 +51,12 @@ export function ContactList({ onSelectConversation }: ContactListProps) {
     return other?.name?.toLowerCase().includes(search.toLowerCase())
   })
 
-  const handleStartChat = async (therapistId: number) => {
+  const handleStartChat = async (userId: number) => {
     try {
-      const conv = await createConv.mutateAsync({ contactId: therapistId })
+      const conv = await createConv.mutateAsync({ contactId: userId })
       setActiveConversation(conv.id)
       onSelectConversation(conv.id)
-      setStartedIds(prev => new Set([...prev, therapistId]))
+      setStartedIds(prev => new Set([...prev, userId]))
     } catch { /* ignore */ }
   }
 
@@ -90,14 +92,53 @@ export function ContactList({ onSelectConversation }: ContactListProps) {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Tìm kiếm..."
+            placeholder="Tìm kiếm bạn bè..."
             className="w-full rounded-xl bg-surface border border-border pl-9 pr-4 py-2 text-sm text-fg-primary placeholder:text-fg-disabled outline-none focus:border-accent-sage transition-colors"
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {!hasContent ? (
+        {/* Search results */}
+        {search.trim() && searchResults.length > 0 && (
+          <div className="mb-2">
+            <div className="px-4 pt-2 pb-1">
+              <p className="text-[11px] font-semibold text-fg-tertiary uppercase tracking-wider">Kết quả tìm kiếm</p>
+            </div>
+            <div className="space-y-0.5 px-2">
+              {searchResults
+                .filter(u => u.id !== currentUser?.id && !existingContactIds.has(u.id) && !startedIds.has(u.id))
+                .map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => handleStartChat(u.id)}
+                    disabled={createConv.isPending}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent-sage/10 transition-colors text-left disabled:opacity-50"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-sage to-emerald-500 flex items-center justify-center text-sm font-semibold text-white shrink-0 shadow-sm">
+                      {u.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? '?'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-fg-primary truncate">{u.name}</p>
+                      <p className="text-xs text-fg-tertiary">{u.role === 'therapist' ? 'Tư vấn viên' : u.role === 'admin' ? 'Quản trị viên' : 'Người dùng'}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-accent-sage font-medium">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                      </svg>
+                      Nhắn tin
+                    </div>
+                  </button>
+                ))}
+              {searchResults.filter(u => u.id !== currentUser?.id).length === 0 && (
+                <p className="text-xs text-fg-tertiary text-center py-4">Không tìm thấy người dùng nào</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!hasContent && !search.trim() ? (
           <div className="flex flex-col items-center py-16 px-4 text-center">
             <div className="mb-4 w-16 h-16 rounded-full bg-accent-sage/10 flex items-center justify-center text-accent-sage">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -105,7 +146,7 @@ export function ContactList({ onSelectConversation }: ContactListProps) {
               </svg>
             </div>
             <p className="text-fg-secondary text-sm mb-1">Chưa có cuộc trò chuyện nào</p>
-            <p className="text-fg-tertiary text-xs">Hãy bắt đầu trò chuyện với tư vấn viên</p>
+            <p className="text-fg-tertiary text-xs">Tìm kiếm bạn bè để bắt đầu trò chuyện</p>
           </div>
         ) : (
           <>
@@ -148,7 +189,7 @@ export function ContactList({ onSelectConversation }: ContactListProps) {
                       disabled={createConv.isPending}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent-lavender/10 transition-colors text-left disabled:opacity-50"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-sm font-semibold text-white flex-shrink-0 shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-sm font-semibold text-white shrink-0 shadow-sm">
                         {t.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'TV'}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -167,7 +208,7 @@ export function ContactList({ onSelectConversation }: ContactListProps) {
               </div>
             )}
 
-            {search && filteredConversations.length === 0 && (
+            {search && filteredConversations.length === 0 && searchResults.length === 0 && (
               <div className="flex flex-col items-center py-12 px-4 text-center">
                 <p className="text-fg-tertiary text-sm">Không tìm thấy kết quả</p>
               </div>

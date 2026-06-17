@@ -32,9 +32,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const res = await api.post('auth/login', { json: { email, password } }).json<{ success: boolean; data: { user: User } }>()
+      const user = res.data.user
+      useChatStore.getState().setCurrentUserId(user.id)
       set({
         token: null,
-        user: res.data.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -50,9 +52,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const res = await api.post('auth/register', { json: { name, email, password } }).json<{ success: boolean; data: { user: User } }>()
+      const user = res.data.user
+      useChatStore.getState().setCurrentUserId(user.id)
       set({
         token: null,
-        user: res.data.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -84,9 +88,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshToken: async () => {
     try {
       const res = await api.post('auth/refresh').json<{ success: boolean; data: { user: User } }>()
+      const user = res.data.user
+      useChatStore.getState().setCurrentUserId(user.id)
       set({
         token: null,
-        user: res.data.user,
+        user,
         isAuthenticated: true,
       })
     } catch {
@@ -98,8 +104,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true })
     try {
       const res = await api.get('auth/me').json<{ success: boolean; data: { user: User } }>()
+      const user = res.data.user
+      useChatStore.getState().setCurrentUserId(user.id)
       set({
-        user: res.data.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
       })

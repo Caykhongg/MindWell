@@ -54,8 +54,8 @@ export function postController(postService: PostService) {
 
     createComment: asyncHandler(async (req: AuthRequest, res: Response) => {
       const postId = parseInt(req.params.id as string, 10);
-      const { content, guestName, guestEmail } = req.body;
-      const comment = await postService.createComment(postId, req.userId ?? null, { content, guestName, guestEmail });
+      const { content, isAnonymous, guestName, guestEmail } = req.body;
+      const comment = await postService.createComment(postId, req.userId ?? null, { content, isAnonymous, guestName, guestEmail });
       res.status(201).json(success(comment));
     }),
 
@@ -64,6 +64,13 @@ export function postController(postService: PostService) {
       const commentId = parseInt(req.params.commentId as string, 10);
       await postService.deleteComment(postId, commentId, req.userId!, req.userRole!);
       res.json(success({ message: 'Xoá bình luận thành công' }));
+    }),
+
+    updateComment: asyncHandler(async (req: AuthRequest, res: Response) => {
+      const commentId = parseInt(req.params.commentId as string, 10);
+      const { content, isAnonymous } = req.body;
+      const comment = await postService.updateComment(commentId, req.userId!, { content, isAnonymous });
+      res.json(success(comment));
     }),
   };
 }

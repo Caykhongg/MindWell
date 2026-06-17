@@ -91,7 +91,7 @@ export class PostService {
     return this.commentRepo.findByPostId(postId, page, limit);
   }
 
-  async createComment(postId: number, userId: number | null, data: { content: string; guestName?: string; guestEmail?: string }) {
+  async createComment(postId: number, userId: number | null, data: { content: string; isAnonymous?: boolean; guestName?: string; guestEmail?: string }) {
     const post = await this.postRepo.findById(postId);
     if (!post) {
       throw new NotFoundError('bài viết');
@@ -101,6 +101,7 @@ export class PostService {
       postId,
       userId,
       content: data.content,
+      isAnonymous: data.isAnonymous ? 1 : 0,
       guestName: data.guestName,
       guestEmail: data.guestEmail,
     });
@@ -121,7 +122,12 @@ export class PostService {
     if (!comment) {
       throw new NotFoundError('bình luận');
     }
-    if (comment.userId !== userId && userRole !== 'admin') {
+
+    const isCommentOwner = comment.userId === userId;
+    const isPostOwner = post.userId === userId;
+    const isAdmin = userRole === 'admin';
+
+    if (!isCommentOwner && !isPostOwner && !isAdmin) {
       throw new ForbiddenError('Bạn không có quyền xoá bình luận này');
     }
 
@@ -129,5 +135,21 @@ export class PostService {
     await this.postRepo.decrementCommentCount(postId);
 
     logger.info({ commentId, postId, userId }, 'Comment deleted');
+  }
+
+  async updateComment(commentId: number, userId: number, data: { content: string; isAnonymous?: boolean }) {
+    const comment = await this.commentRepo.findById(commentId);
+    if (!comment) {
+      throw new NotFoundError('bình luận');
+    }
+    if (comment.userId !== userId) {
+      throw new ForbiddenError('Bạn không có quyền sửa bình luận này');
+    }
+
+    const updated = await this.commentRepo.update(commentId, {
+      content: data.content,
+      isAnonymous: data.isAnonymous !== undefined ? (data.isAnonymous ? 1 : 0) : comment.isAnonymous,
+    });
+    return updated!;
   }
 }

@@ -7,6 +7,7 @@ interface ChatState {
   messages: Map<number, Message[]>
   unreadCount: number
   contacts: Contact[]
+  currentUserId: number | null
 
   setConversations: (conversations: Conversation[]) => void
   setActiveConversation: (id: number | null) => void
@@ -16,6 +17,7 @@ interface ChatState {
   markAsRead: (conversationId: number) => void
   setContacts: (contacts: Contact[]) => void
   updateContactStatus: (userId: number, isOnline: boolean) => void
+  setCurrentUserId: (id: number | null) => void
   purge: () => void
 }
 
@@ -25,10 +27,17 @@ export const useChatStore = create<ChatState>((set) => ({
   messages: new Map(),
   unreadCount: 0,
   contacts: [],
+  currentUserId: null,
+
+  setCurrentUserId: (id) => set({ currentUserId: id }),
 
   setConversations: (conversations) => {
+    const currentUserId = useChatStore.getState().currentUserId
     const unreadCount = conversations.reduce((acc, c) => {
-      return acc + (c.last_message && !c.last_message.is_read ? 1 : 0)
+      const lastMsg = c.last_message
+      if (!lastMsg || lastMsg.is_read) return acc
+      if (currentUserId && lastMsg.sender_id === currentUserId) return acc
+      return acc + 1
     }, 0)
     set({ conversations, unreadCount })
   },
@@ -42,7 +51,20 @@ export const useChatStore = create<ChatState>((set) => ({
       if (!existing.some((m) => m.id === message.id)) {
         updated.set(conversationId, [...existing, message])
       }
-      return { messages: updated }
+      const conversations = state.conversations.map((c) =>
+        c.id === conversationId ? { ...c, last_message: message } : c
+      )
+      const lastMsg = message
+      let unreadCount = state.unreadCount
+      if (lastMsg && !lastMsg.is_read && state.currentUserId && lastMsg.sender_id !== state.currentUserId) {
+        unreadCount = conversations.reduce((acc, c) => {
+          const lm = c.last_message
+          if (!lm || lm.is_read) return acc
+          if (state.currentUserId && lm.sender_id === state.currentUserId) return acc
+          return acc + 1
+        }, 0)
+      }
+      return { messages: updated, conversations, unreadCount }
     }),
 
   incrementUnread: (amount) =>
@@ -68,8 +90,12 @@ export const useChatStore = create<ChatState>((set) => ({
           ? { ...c, last_message: { ...c.last_message, is_read: true } }
           : c,
       )
+      const currentUserId = state.currentUserId
       const unreadCount = conversations.reduce((acc, c) => {
-        return acc + (c.last_message && !c.last_message.is_read ? 1 : 0)
+        const lm = c.last_message
+        if (!lm || lm.is_read) return acc
+        if (currentUserId && lm.sender_id === currentUserId) return acc
+        return acc + 1
       }, 0)
       return { messages: updated, conversations, unreadCount }
     }),

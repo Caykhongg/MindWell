@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { users } from '../db/schema/users.js';
 import { ChatService } from '../services/chat.service.js';
@@ -48,6 +48,26 @@ export function chatController(chatService: ChatService) {
         role: users.role,
       }).from(users).where(eq(users.role, 'therapist'));
       res.json(success(therapists));
+    }),
+
+    searchUsers: asyncHandler(async (req: AuthRequest, res: Response) => {
+      const q = (req.query.q as string) || '';
+      if (!q.trim()) {
+        res.json(success([]));
+        return;
+      }
+      const results = await db.select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+      })
+        .from(users)
+        .where(
+          sql`LOWER(${users.name}) LIKE LOWER(${'%' + q.trim() + '%'})`
+        )
+        .limit(20);
+      res.json(success(results));
     }),
 
     markRead: asyncHandler(async (req: AuthRequest, res: Response) => {

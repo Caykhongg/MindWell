@@ -90,6 +90,7 @@ export interface Comment {
   post_id: number
   user_id: number | null
   content: string
+  is_anonymous: boolean
   created_at: string
   author?: User
   guest_name?: string

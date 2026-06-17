@@ -80,6 +80,7 @@ export function useMessages(convId: number | null) {
 
 export function useSendMessage() {
   const qc = useQueryClient()
+  const markAsRead = useChatStore((s) => s.markAsRead)
   return useMutation({
     mutationFn: async (data: SendMessageFormData & { conversation_id: number }) => {
       const res = await api
@@ -90,6 +91,7 @@ export function useSendMessage() {
       return toMsg(res.data)
     },
     onSuccess: (_data, variables) => {
+      markAsRead(variables.conversation_id)
       qc.invalidateQueries({ queryKey: ['chat', 'messages', variables.conversation_id] })
       qc.invalidateQueries({ queryKey: ['chat', 'conversations'] })
     },
@@ -130,5 +132,18 @@ export function useMarkAsRead() {
       markAsRead(convId)
       qc.invalidateQueries({ queryKey: ['chat', 'conversations'] })
     },
+  })
+}
+
+export function useSearchUsers(query: string) {
+  return useQuery({
+    queryKey: ['chat', 'users', 'search', query],
+    queryFn: async () => {
+      if (!query.trim()) return []
+      const res = await api.get('chat/users/search', { searchParams: { q: query } }).json<{ success: boolean; data: User[] }>()
+      return res.data
+    },
+    enabled: query.trim().length > 0,
+    staleTime: 10_000,
   })
 }
