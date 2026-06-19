@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { config } from '../config/index.js';
 import { users } from './schema/users.js';
 import { botReplies } from './schema/bot-replies.js';
+import { mentalTests } from './schema/mental-tests.js';
 import { appointments } from './schema/appointments.js';
 
 const sql = postgres(config.database.url, { max: 1 });
@@ -61,6 +62,24 @@ async function main() {
   }
 
   console.log('Created bot replies');
+
+  await db.insert(mentalTests).values({
+    userId: patient.id,
+    score: 7,
+    result: 'Nhẹ - Bạn có một số dấu hiệu lo âu nhẹ. Hãy theo dõi và chăm sóc sức khỏe tinh thần.',
+    answers: JSON.stringify({ q1: 2, q2: 1, q3: 2, q4: 1, q5: 1 }),
+    testType: 'gad-7',
+  });
+
+  await db.insert(mentalTests).values({
+    userId: patient.id,
+    score: 15,
+    result: 'Vừa - Bạn có dấu hiệu trầm cảm ở mức độ vừa. Nên tìm sự hỗ trợ từ chuyên gia tâm lý.',
+    answers: JSON.stringify({ q1: 2, q2: 2, q3: 1, q4: 3, q5: 2, q6: 3, q7: 2 }),
+    testType: 'phq-9',
+  });
+
+  console.log('Created test results');
 
   const now = new Date();
   const tomorrow = new Date(now);

@@ -22,6 +22,41 @@ export interface DiaryEntry {
   updated_at: string
 }
 
+export interface TestResult {
+  id: number
+  user_id: number
+  test_type: string
+  score: number
+  severity: string
+  result: string
+  answers: number[]
+  created_at: string
+}
+
+export interface TestType {
+  id: string
+  name: string
+  description: string
+  time: string
+  questions: string[]
+  options: TestOption[]
+  severityLevels: SeverityLevel[]
+}
+
+export interface TestOption {
+  label: string
+  value: number
+}
+
+export interface SeverityLevel {
+  min: number
+  max: number
+  label: string
+  description: string
+  recommendation: string
+  color: string
+}
+
 export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed'
 
 export interface Appointment {

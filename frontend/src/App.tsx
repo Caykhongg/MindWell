@@ -4,6 +4,7 @@ import { AuthModal } from '@/components/features/auth/auth-modal'
 import { useAuthStore } from '@/stores/auth-store'
 import { useChatStore } from '@/stores/chat-store'
 import { DiaryPage } from '@/components/features/diary/diary-page'
+import { TestPage } from '@/components/features/test/test-page'
 import { AppointmentsPage } from '@/components/features/appointments/appointments-page'
 import { CommunityPage } from '@/components/features/community/community-page'
 import { PostDetail } from '@/components/features/community/post-detail'
@@ -12,7 +13,7 @@ import { ChatPage } from '@/components/features/chat/chat-page'
 import { PageAgent } from '@/components/features/agent/page-agent'
 import { ExpandableTabs } from '@/components/ui/expandable-tabs'
 import { SVGFollower } from '@/components/ui/svg-follower'
-import { BookOpen, Users, Calendar, MessageCircle, Home, PlusCircle, UserCog, Library, Flag } from 'lucide-react'
+import { BookOpen, ClipboardCheck, Users, Calendar, MessageCircle, Home, PlusCircle, UserCog, Library, Flag } from 'lucide-react'
 import { RoleRequestPage } from '@/components/features/auth/role-request'
 import { LibraryPage } from '@/components/features/library/library-page'
 import { LibraryDetail } from '@/components/features/library/library-detail'
@@ -23,7 +24,7 @@ import { PostEdit } from '@/components/features/community/post-edit'
 import { NotificationBell } from '@/components/features/notifications/notification-bell'
 import type { LucideIcon } from 'lucide-react'
 
-const tabRoutes = ['/', '/diary', '/library', '/community', '/appointments', '/chat']
+const tabRoutes = ['/', '/diary', '/test', '/library', '/community', '/appointments', '/chat']
 
 function NavBar() {
   const [authOpen, setAuthOpen] = useState(false)
@@ -32,10 +33,13 @@ function NavBar() {
   const chatUnread = useChatStore((s) => s.unreadCount)
   const navigate = useNavigate()
   const role = user?.role ?? 'patient'
+  const canManageTests = role === 'therapist' || role === 'admin'
+
   const navTabs: ({ title: string; icon: LucideIcon; badge?: number } | { type: 'separator' })[] = [
     { title: 'Trang chủ', icon: Home },
     { type: 'separator' as const },
     { title: 'Nhật ký', icon: BookOpen },
+    { title: 'Kiểm tra', icon: ClipboardCheck },
     { title: 'Thư viện', icon: Library },
     { title: 'Cộng đồng', icon: Users },
     { title: 'Lịch hẹn', icon: Calendar },
@@ -61,13 +65,15 @@ function NavBar() {
           <div className="flex items-center gap-2">
             {isAuthenticated && user ? (
               <>
-                <Link
-                  to="/library/manage"
-                    className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
-                  >
-                    <PlusCircle size={14} />
-                    Đăng bài viết
-                  </Link>
+                {canManageTests && (
+                  <Link
+                    to="/library/manage"
+                      className="hidden sm:inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs text-accent-sage font-medium hover:bg-accent-sage-surface transition-colors no-underline"
+                    >
+                      <PlusCircle size={14} />
+                      Đăng bài viết
+                    </Link>
+                )}
                 {role === 'patient' && (
                   <Link
                     to="/role-request"
@@ -166,10 +172,10 @@ function HomePage() {
         </p>
         <div className="flex items-center justify-center gap-4 pt-4">
           <Link
-            to="/diary"
+            to="/test"
             className="rounded-full bg-accent-sage text-white px-8 py-3 font-medium hover:bg-accent-sage/90 transition-colors text-sm no-underline"
           >
-            Nhật ký cảm xúc
+            Kiểm tra sức khỏe
           </Link>
           <Link
             to="/chat"
@@ -182,7 +188,7 @@ function HomePage() {
 
       <section className="mt-32 grid md:grid-cols-3 gap-6">
         {[
-          { icon: BookOpen, title: 'Nhật ký cảm xúc', desc: 'Ghi lại cảm xúc hàng ngày và theo dõi sự thay đổi theo thời gian', to: '/diary' },
+          { icon: ClipboardCheck, title: 'Bài kiểm tra', desc: 'Đánh giá sức khỏe tâm thần qua các bài kiểm tra chuẩn hóa', to: '/test' },
           { icon: BookOpen, title: 'Nhật ký cảm xúc', desc: 'Ghi lại cảm xúc hàng ngày và theo dõi sự thay đổi theo thời gian', to: '/diary' },
           { icon: MessageCircle, title: 'Tư vấn trực tuyến', desc: 'Trò chuyện bảo mật với chuyên gia tư vấn tâm lý', to: '/chat' },
         ].map((item) => (
@@ -221,6 +227,7 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/diary" element={<DiaryPage />} />
+          <Route path="/test" element={<TestPage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/community/:id" element={<PostDetail />} />
           <Route path="/appointments" element={<AppointmentsPage />} />

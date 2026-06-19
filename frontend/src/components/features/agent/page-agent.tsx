@@ -10,8 +10,9 @@ export function PageAgent() {
   const location = useLocation()
 
   useEffect(() => {
+    const isTestResult = location.pathname === '/test' && location.search.includes('result')
     const severityParam = new URLSearchParams(location.search).get('severity')
-    if (severityParam === 'high' || severityParam === 'severe') {
+    if (isTestResult && (severityParam === 'high' || severityParam === 'severe')) {
       setShowCrisisBanner(true)
     }
   }, [location, setShowCrisisBanner])
