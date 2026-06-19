@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "MindWell - Mental Health Support Platform API",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc && node -e \"require('fs').cpSync('src/db/migrations','dist/db/migrations',{recursive:true})\"",
