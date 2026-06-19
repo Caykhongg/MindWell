@@ -26,8 +26,8 @@ export function EntryCreate({ onSubmit, isLoading }: EntryCreateProps) {
 
   const selectedMood = watch('mood') as Mood | undefined
 
-  const handleFormSubmit = async (data: any) => {
-    await onSubmit(data as CreateEntryFormData)
+  const handleFormSubmit = async (data: CreateEntryFormData) => {
+    await onSubmit(data)
     reset()
     setTagsInput('')
   }

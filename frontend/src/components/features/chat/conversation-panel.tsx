@@ -46,7 +46,7 @@ export function ConversationPanel({ onBack }: ConversationPanelProps) {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages.length])
 
   if (!activeConversationId || !activeConversation) {
     return (

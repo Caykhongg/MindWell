@@ -99,7 +99,7 @@ export function ChatInput({ conversationId }: ChatInputProps) {
           type="button"
           onClick={handleSend}
           disabled={!text.trim() || sendMutation.isPending}
-          className="flex-shrink-0 rounded-full bg-[#0084ff] text-white p-2 transition-colors hover:bg-[#0073e6] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-shrink-0 rounded-full bg-accent-sage text-white p-2 transition-colors hover:bg-accent-sage/90 disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Gửi"
         >
           {sendMutation.isPending ? (

@@ -13,7 +13,6 @@ interface PostActionsProps {
 }
 
 export function PostActions({
-  postId: _postId,
   userId,
   likeCount,
   isLiked,

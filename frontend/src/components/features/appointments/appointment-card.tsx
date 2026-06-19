@@ -52,7 +52,7 @@ export function AppointmentCard({ appointment, onCancel, isCancelling }: Appoint
                   disabled={isCancelling}
                   className="text-xs rounded-full bg-crisis text-white px-2.5 py-1 transition-colors hover:bg-crisis/90 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crisis"
                 >
-                  {isCancelling ? 'Đang huỷ...' : 'Xác nhận'}
+                  {isCancelling ? 'Đang huỷ...' : 'Xác nhận huỷ'}
                 </button>
                 <button
                   type="button"

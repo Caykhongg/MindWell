@@ -40,8 +40,8 @@ export function RoleRequestPage() {
     try {
       await api.post('admin/role-request', { json: { reason } })
       setSent(true)
-    } catch (err: any) {
-      const msg = err?.message || 'Gửi yêu cầu thất bại'
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Gửi yêu cầu thất bại'
       setError(msg)
     }
   }

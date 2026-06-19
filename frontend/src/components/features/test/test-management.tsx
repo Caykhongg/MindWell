@@ -27,7 +27,7 @@ export function TestManagement() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [questions, setQuestions] = useState<Question[]>([
-    { questionText: '', options: [{ label: 'Rất ít', value: 0 }, { label: 'Nhiều', value: 3 }], orderIndex: 0 },
+    { questionText: '', options: [{ label: 'Không bao giờ', value: 0 }, { label: 'Vài ngày', value: 1 }, { label: 'Hơn nửa số ngày', value: 2 }, { label: 'Hầu như mỗi ngày', value: 3 }], orderIndex: 0 },
   ])
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
@@ -49,7 +49,7 @@ export function TestManagement() {
   const resetForm = () => {
     setTitle('')
     setDescription('')
-    setQuestions([{ questionText: '', options: [{ label: 'Rất ít', value: 0 }, { label: 'Nhiều', value: 3 }], orderIndex: 0 }])
+    setQuestions([{ questionText: '', options: [{ label: 'Không bao giờ', value: 0 }, { label: 'Vài ngày', value: 1 }, { label: 'Hơn nửa số ngày', value: 2 }, { label: 'Hầu như mỗi ngày', value: 3 }], orderIndex: 0 }])
     setEditing(null)
     setShowForm(false)
   }
@@ -74,15 +74,14 @@ export function TestManagement() {
     setQuestions(questions.filter((_, i) => i !== idx).map((q, i) => ({ ...q, orderIndex: i })))
   }
 
-  const updateQuestion = (idx: number, field: string, value: string) => {
-    const qs = [...questions]
-    ;(qs[idx] as any)[field] = value
-    setQuestions(qs)
+  const updateQuestion = (idx: number, field: keyof Question, value: string) => {
+    setQuestions(prev => prev.map((q, i) => i === idx ? { ...q, [field]: value } : q))
   }
 
   const addOption = (qIdx: number) => {
     const qs = [...questions]
-    qs[qIdx].options = [...qs[qIdx].options, { label: '', value: qs[qIdx].options.length }]
+    const lastValue = qs[qIdx].options.length > 0 ? qs[qIdx].options[qs[qIdx].options.length - 1].value : -1
+    qs[qIdx].options = [...qs[qIdx].options, { label: '', value: lastValue + 1 }]
     setQuestions(qs)
   }
 

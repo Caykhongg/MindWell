@@ -218,7 +218,7 @@ function AppLayout() {
       fetchMe()
     }
     init()
-  }, [])
+  }, [refreshToken, fetchMe])
 
   return (
     <div className="min-h-screen bg-canvas relative">
@@ -229,6 +229,7 @@ function AppLayout() {
           <Route path="/diary" element={<DiaryPage />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/community" element={<CommunityPage />} />
+          <Route path="/community/:id/edit" element={<PostEdit />} />
           <Route path="/community/:id" element={<PostDetail />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/chat" element={<ChatPage />} />
@@ -239,7 +240,6 @@ function AppLayout() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/availability" element={<AvailabilityPage />} />
           <Route path="/admin/reports" element={<ReportManagePage />} />
-          <Route path="/community/:id/edit" element={<PostEdit />} />
         </Routes>
         <PageAgent />
       </div>

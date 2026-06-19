@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 
 interface Article {
@@ -13,17 +14,32 @@ interface Article {
   updated_at: string
 }
 
-function toArticle(m: any): Article {
+interface RawArticle {
+  id: number
+  authorId?: number
+  author_id?: number
+  title: string
+  content: string
+  category: string
+  status: string
+  tags: string | null
+  createdAt?: string
+  created_at?: string
+  updatedAt?: string
+  updated_at?: string
+}
+
+function toArticle(m: RawArticle): Article {
   return {
     id: m.id,
-    author_id: m.authorId ?? m.author_id,
+    author_id: m.authorId ?? m.author_id!,
     title: m.title,
     content: m.content,
     category: m.category,
     status: m.status,
     tags: m.tags,
-    created_at: m.createdAt ?? m.created_at,
-    updated_at: m.updatedAt ?? m.updated_at,
+    created_at: m.createdAt ?? m.created_at!,
+    updated_at: m.updatedAt ?? m.updated_at!,
   }
 }
 
@@ -40,36 +56,44 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export function LibraryManage({ embedded }: { embedded?: boolean }) {
-  const [articles, setArticles] = useState<Article[]>([])
-  const [loading, setLoading] = useState(true)
+  const qc = useQueryClient()
   const [editingId, setEditingId] = useState<number | null>(null)
   const [form, setForm] = useState({ title: '', content: '', category: 'general', status: 'draft', tags: '' })
 
-  const fetchArticles = async () => {
-    try {
-      const res = await api.get('library/articles/all').json<{ success: boolean; data: any[] }>()
-      setArticles((res.data ?? []).map(toArticle))
-    } catch { /* ignore */ }
-    setLoading(false)
-  }
-
-  useEffect(() => { fetchArticles() }, [])
+  const { data: articles = [], isLoading: loading } = useQuery({
+    queryKey: ['library-articles'],
+    queryFn: async () => {
+      const res = await api.get('library/articles/all').json<{ success: boolean; data: RawArticle[] }>()
+      return (res.data ?? []).map(toArticle)
+    },
+  })
 
   const resetForm = () => setForm({ title: '', content: '', category: 'general', status: 'draft', tags: '' })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const payload = { ...form, tags: form.tags || null }
-    try {
+  const saveMutation = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
       if (editingId) {
         await api.patch(`library/articles/${editingId}`, { json: payload })
       } else {
         await api.post('library/articles', { json: payload })
       }
+    },
+    onSuccess: () => {
       resetForm()
       setEditingId(null)
-      fetchArticles()
-    } catch { /* ignore */ }
+      qc.invalidateQueries({ queryKey: ['library-articles'] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`library/articles/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['library-articles'] }),
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const payload = { ...form, tags: form.tags || null }
+    saveMutation.mutate(payload)
   }
 
   const handleEdit = (a: Article) => {
@@ -77,12 +101,9 @@ export function LibraryManage({ embedded }: { embedded?: boolean }) {
     setForm({ title: a.title, content: a.content, category: a.category, status: a.status, tags: a.tags ?? '' })
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (id: number) => {
     if (!confirm('Xoá bài viết này?')) return
-    try {
-      await api.delete(`library/articles/${id}`)
-      fetchArticles()
-    } catch { /* ignore */ }
+    deleteMutation.mutate(id)
   }
 
   const Wrapper = embedded ? 'div' : 'main'

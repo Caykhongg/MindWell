@@ -72,6 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await api.post('auth/logout')
     } catch {
+      /* ignore */
     } finally {
       useChatStore.getState().purge()
       useAgentStore.getState().clearMessages()

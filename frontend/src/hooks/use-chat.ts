@@ -5,20 +5,33 @@ import { useChatStore } from '@/stores/chat-store'
 import type { Conversation, Message, User } from '@/types'
 import type { SendMessageFormData } from '@/lib/chat-schemas'
 
-function toMsg(m: any): Message {
+interface RawMessage {
+  id: number
+  conversationId?: number
+  conversation_id?: number
+  senderId?: number
+  sender_id?: number
+  text: string
+  isRead?: boolean
+  is_read?: boolean
+  createdAt?: string
+  created_at?: string
+}
+
+function toMsg(m: RawMessage): Message {
   return {
     id: m.id,
-    conversation_id: m.conversationId ?? m.conversation_id,
-    sender_id: m.senderId ?? m.sender_id,
+    conversation_id: m.conversationId ?? m.conversation_id!,
+    sender_id: m.senderId ?? m.sender_id!,
     text: m.text,
     is_read: !!(m.isRead ?? m.is_read),
-    created_at: m.createdAt ?? m.created_at,
+    created_at: m.createdAt ?? m.created_at!,
   }
 }
 
 interface BackendConv {
   conversation: { id: number; createdAt: string; updatedAt: string }
-  lastMessage: any
+  lastMessage: RawMessage | null
   participants: { id: number; name: string; email: string; role: string; avatarUrl: string | null }[]
 }
 
@@ -61,7 +74,7 @@ export function useMessages(convId: number | null) {
   const query = useQuery({
     queryKey: ['chat', 'messages', convId],
     queryFn: async () => {
-      const res = await api.get(`chat/conversations/${convId}/messages`).json<{ success: boolean; data: any[] }>()
+      const res = await api.get(`chat/conversations/${convId}/messages`).json<{ success: boolean; data: RawMessage[] }>()
       return (res.data ?? []).map(toMsg)
     },
     enabled: !!convId,
@@ -87,7 +100,7 @@ export function useSendMessage() {
         .post(`chat/conversations/${data.conversation_id}/messages`, {
           json: { text: data.text },
         })
-        .json<{ success: boolean; data: any }>()
+        .json<{ success: boolean; data: RawMessage }>()
       return toMsg(res.data)
     },
     onSuccess: (_data, variables) => {
@@ -102,8 +115,8 @@ export function useCreateConversation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (data: { contactId: number }) => {
-      const res = await api.post('chat/conversations', { json: data }).json<{ success: boolean; data: any }>()
-      return toConversation(res.data as BackendConv) as any as Conversation
+      const res = await api.post('chat/conversations', { json: data }).json<{ success: boolean; data: BackendConv }>()
+      return toConversation(res.data)
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['chat', 'conversations'] })

@@ -1,6 +1,7 @@
 import { BotReplyRepository, ChatFeedbackRepository } from '../repositories/bot.repository.js';
 import { NotFoundError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
+import { trace } from '../utils/tracing.js';
 
 const CRISIS_KEYWORDS = [
   'tự tử', 'tự sát', 'khủng hoảng', 'muốn chết',
@@ -26,7 +27,7 @@ export class BotService {
     private feedbackRepo: ChatFeedbackRepository
   ) {}
 
-  async chat(message: string, userId?: number) {
+  chat = trace(async (message: string, userId?: number) => {
     const lowerMsg = message.toLowerCase();
 
     for (const keyword of CRISIS_KEYWORDS) {
@@ -36,25 +37,20 @@ export class BotService {
       }
     }
 
-    const words = lowerMsg.split(/\s+/);
-    const matchedReplies: { reply: string; keyword: string }[] = [];
+    const words = lowerMsg.split(/\s+/).filter(w => w.length >= 2);
 
-    for (const word of words) {
-      if (word.length < 2) continue;
-      const results = await this.botReplyRepo.findByKeyword(word);
-      for (const r of results) {
-        matchedReplies.push({ reply: r.reply, keyword: word });
+    if (words.length > 0) {
+      const results = await this.botReplyRepo.findByKeywords(words);
+      const matchedReplies = results.flatMap(r => ({ reply: r.reply, keyword: r.keywords }));
+      if (matchedReplies.length > 0) {
+        const selected = matchedReplies[Math.floor(Math.random() * matchedReplies.length)];
+        return { reply: selected.reply, isCrisis: false, matchedKeyword: selected.keyword };
       }
-    }
-
-    if (matchedReplies.length > 0) {
-      const selected = matchedReplies[Math.floor(Math.random() * matchedReplies.length)];
-      return { reply: selected.reply, isCrisis: false, matchedKeyword: selected.keyword };
     }
 
     const fallback = DEFAULT_REPLIES[Math.floor(Math.random() * DEFAULT_REPLIES.length)];
     return { reply: fallback, isCrisis: false };
-  }
+  }, { name: 'BotService.chat' });
 
   async submitFeedback(
     data: { messageText: string; botReply: string; helpful: number; keywords?: string },

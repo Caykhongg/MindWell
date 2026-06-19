@@ -16,6 +16,7 @@ export const updatePostSchema = z.object({
 
 export const createCommentSchema = z.object({
   content: z.string().min(1, 'Nội dung không được để trống').max(5000, 'Nội dung tối đa 5000 ký tự'),
+  isAnonymous: z.boolean().optional(),
   guestName: z.string().min(1, 'Vui lòng nhập tên').max(100).optional(),
   guestEmail: z.string().email('Email không hợp lệ').optional(),
 });

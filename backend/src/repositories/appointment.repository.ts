@@ -1,4 +1,4 @@
-import { eq, desc, count, and } from 'drizzle-orm';
+import { eq, desc, count, and, ne } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import {
   appointments,
@@ -73,7 +73,7 @@ export class AppointmentRepository {
         and(
           eq(appointments.userId, userId),
           eq(appointments.date, date),
-          eq(appointments.status, 'pending')
+          ne(appointments.status, 'cancelled')
         )
       )
       .limit(1);

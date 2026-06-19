@@ -12,6 +12,7 @@ interface ReportModalProps {
 
 export function ReportModal({ postId, open, onClose }: ReportModalProps) {
   const [reason, setReason] = useState('')
+  const [customReason, setCustomReason] = useState('')
   const { isAuthenticated } = useAuthStore()
   const qc = useQueryClient()
 
@@ -22,6 +23,7 @@ export function ReportModal({ postId, open, onClose }: ReportModalProps) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['reports'] })
       setReason('')
+      setCustomReason('')
       setTimeout(onClose, 1500)
     },
   })
@@ -67,8 +69,8 @@ export function ReportModal({ postId, open, onClose }: ReportModalProps) {
 
         {reason === 'Khác' && (
           <textarea
-            value={reason}
-            onChange={e => setReason(e.target.value)}
+            value={customReason}
+            onChange={e => setCustomReason(e.target.value)}
             placeholder="Mô tả chi tiết lý do..."
             rows={3}
             className="w-full rounded-xl bg-surface border border-border px-4 py-2.5 text-sm text-fg-primary placeholder:text-fg-disabled outline-none focus:border-accent-sage resize-none mb-4"
@@ -80,8 +82,8 @@ export function ReportModal({ postId, open, onClose }: ReportModalProps) {
             className="flex-1 rounded-full border border-border px-4 py-2 text-sm text-fg-secondary hover:bg-surface-hover">
             Huỷ
           </button>
-          <button type="button" onClick={() => reportMutation.mutate({ postId, reason })}
-            disabled={!reason || reportMutation.isPending}
+          <button type="button" onClick={() => reportMutation.mutate({ postId, reason: reason === 'Khác' ? customReason : reason })}
+            disabled={!reason || (reason === 'Khác' && !customReason.trim()) || reportMutation.isPending}
             className="flex-1 rounded-full bg-crisis text-white px-4 py-2 text-sm font-medium hover:bg-crisis/90 disabled:opacity-50">
             {reportMutation.isPending ? 'Đang gửi...' : 'Gửi tố cáo'}
           </button>

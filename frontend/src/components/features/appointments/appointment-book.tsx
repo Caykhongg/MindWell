@@ -77,10 +77,9 @@ export function AppointmentBook({ onSubmit, isLoading, isError, error }: Appoint
   }
 
   const buildDateString = (): string => {
-    const month = selectedMonth.toString().padStart(2, '0')
-    const day = selectedDay.padStart(2, '0')
-    const time = selectedTime || '08:00'
-    return `${selectedYear}-${month}-${day}T${time}:00.000Z`
+    const [hours, minutes] = (selectedTime || '08:00').split(':').map(Number)
+    const date = new Date(selectedYear, selectedMonth - 1, parseInt(selectedDay), hours, minutes)
+    return date.toISOString()
   }
 
   const handleSubmit = async () => {

@@ -18,7 +18,7 @@ export function ChatPage() {
     if (activeConversationId) {
       markAsReadMutation.mutate(activeConversationId)
     }
-  }, [activeConversationId])
+  }, [activeConversationId, markAsReadMutation])
 
   const handleSelectConversation = useCallback(() => {
     setShowPanel(true)

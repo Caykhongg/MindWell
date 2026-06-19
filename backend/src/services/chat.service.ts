@@ -3,6 +3,7 @@ import { MessageRepository } from '../repositories/message.repository.js';
 import { NotFoundError, ForbiddenError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
 import { getRoomManager } from '../websocket/registry.js';
+import { trace } from '../utils/tracing.js';
 
 export class ChatService {
   constructor(
@@ -11,11 +12,6 @@ export class ChatService {
   ) {}
 
   async createConversation(creatorId: number, contactId: number) {
-    if (creatorId === contactId) {
-      const existing = await this.conversationRepo.findExistingPrivateConversation(creatorId, contactId);
-      if (existing) return existing;
-    }
-
     const existing = await this.conversationRepo.findExistingPrivateConversation(creatorId, contactId);
     if (existing) return existing;
 
@@ -54,7 +50,7 @@ export class ChatService {
     return this.messageRepo.findByConversationId(conversationId, cursor);
   }
 
-  async sendMessage(conversationId: number, senderId: number, text: string) {
+  sendMessage = trace(async (conversationId: number, senderId: number, text: string) => {
     const isParticipant = await this.conversationRepo.isParticipant(conversationId, senderId);
     if (!isParticipant) throw new ForbiddenError('Bạn không phải thành viên của cuộc trò chuyện này');
 
@@ -75,7 +71,7 @@ export class ChatService {
 
     logger.info({ messageId: message.id, conversationId, senderId }, 'Message sent');
     return message;
-  }
+  }, { name: 'ChatService.sendMessage' });
 
   async markAsRead(conversationId: number, userId: number, messageIds: number[]) {
     const isParticipant = await this.conversationRepo.isParticipant(conversationId, userId);

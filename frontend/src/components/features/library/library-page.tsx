@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
 import { LibraryManage } from './library-manage'
@@ -16,17 +17,32 @@ interface Article {
   updated_at: string
 }
 
-function toArticle(m: any): Article {
+interface RawArticle {
+  id: number
+  authorId?: number
+  author_id?: number
+  title: string
+  content: string
+  category: string
+  status: string
+  tags: string | null
+  createdAt?: string
+  created_at?: string
+  updatedAt?: string
+  updated_at?: string
+}
+
+function toArticle(m: RawArticle): Article {
   return {
     id: m.id,
-    author_id: m.authorId ?? m.author_id,
+    author_id: m.authorId ?? m.author_id!,
     title: m.title,
     content: m.content,
     category: m.category,
     status: m.status,
     tags: m.tags,
-    created_at: m.createdAt ?? m.created_at,
-    updated_at: m.updatedAt ?? m.updated_at,
+    created_at: m.createdAt ?? m.created_at!,
+    updated_at: m.updatedAt ?? m.updated_at!,
   }
 }
 
@@ -35,26 +51,25 @@ export function LibraryPage() {
   const role = user?.role ?? 'patient'
   const canManage = role === 'therapist' || role === 'admin'
   const [tab, setTab] = useState<'browse' | 'manage'>('browse')
-  const [articles, setArticles] = useState<Article[]>([])
-  const [categories, setCategories] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const url = selectedCategory ? `library/articles?category=${encodeURIComponent(selectedCategory)}` : 'library/articles'
-        const [articlesRes, catsRes] = await Promise.all([
-          api.get(url).json<{ success: boolean; data: any[] }>(),
-          api.get('library/articles/categories').json<{ success: boolean; data: string[] }>(),
-        ])
-        setArticles((articlesRes.data ?? []).map(toArticle))
-        setCategories(catsRes.data ?? [])
-      } catch { /* ignore */ }
-      setLoading(false)
-    }
-    fetch()
-  }, [selectedCategory])
+  const { data: articles = [], isLoading: loading } = useQuery({
+    queryKey: ['library-articles', selectedCategory],
+    queryFn: async () => {
+      const url = selectedCategory ? `library/articles?category=${encodeURIComponent(selectedCategory)}` : 'library/articles'
+      const res = await api.get(url).json<{ success: boolean; data: RawArticle[] }>()
+      return (res.data ?? []).map(toArticle)
+    },
+  })
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['library-categories'],
+    queryFn: async () => {
+      const res = await api.get('library/articles/categories').json<{ success: boolean; data: string[] }>()
+      return res.data ?? []
+    },
+    staleTime: 60_000,
+  })
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">

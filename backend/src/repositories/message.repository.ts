@@ -1,4 +1,4 @@
-import { eq, desc, lt, and, sql } from 'drizzle-orm';
+import { eq, ne, desc, lt, and, sql } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import {
   messages,
@@ -48,7 +48,7 @@ export class MessageRepository {
         and(
           eq(messages.conversationId, conversationId),
           eq(messages.isRead, 0),
-          eq(messages.senderId, userId)
+          ne(messages.senderId, userId)
         )
       );
     return Number(result?.count || 0);

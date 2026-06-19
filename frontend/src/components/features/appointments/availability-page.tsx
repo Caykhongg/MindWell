@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
@@ -12,6 +12,25 @@ interface Slot {
   endTime: string
 }
 
+interface AvailabilityItem {
+  day_of_week: string
+  start_time: string
+  end_time: string
+}
+
+interface AvailabilityData {
+  availability: AvailabilityItem[]
+  timeOff: unknown[]
+}
+
+function toSlots(availability: AvailabilityItem[]): Slot[] {
+  return availability.map(a => ({
+    dayOfWeek: a.day_of_week,
+    startTime: a.start_time.slice(0, 5),
+    endTime: a.end_time.slice(0, 5),
+  }))
+}
+
 export function AvailabilityPage() {
   const qc = useQueryClient()
   const { user } = useAuthStore()
@@ -21,20 +40,10 @@ export function AvailabilityPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['availability'],
     queryFn: async () => {
-      const res = await api.get('availability').json<{ success: boolean; data: { availability: any[]; timeOff: any[] } }>()
+      const res = await api.get('availability').json<{ success: boolean; data: AvailabilityData }>()
       return res.data
     },
   })
-
-  useEffect(() => {
-    if (data?.availability) {
-      setSlots(data.availability.map((a: any) => ({
-        dayOfWeek: a.day_of_week,
-        startTime: a.start_time.slice(0, 5),
-        endTime: a.end_time.slice(0, 5),
-      })))
-    }
-  }, [data])
 
   const saveMutation = useMutation({
     mutationFn: async (slotsData: Slot[]) => {
@@ -45,6 +54,20 @@ export function AvailabilityPage() {
       setEditing(false)
     },
   })
+
+  const startEditing = () => {
+    if (data?.availability) {
+      setSlots(toSlots(data.availability))
+    }
+    setEditing(true)
+  }
+
+  const cancelEditing = () => {
+    if (data?.availability) {
+      setSlots(toSlots(data.availability))
+    }
+    setEditing(false)
+  }
 
   const addSlot = (day: string) => {
     setSlots(prev => [...prev, { dayOfWeek: day, startTime: '08:00', endTime: '09:00' }])
@@ -82,14 +105,9 @@ export function AvailabilityPage() {
           type="button"
           onClick={() => {
             if (editing) {
-              setSlots(data?.availability?.map((a: any) => ({
-                dayOfWeek: a.day_of_week,
-                startTime: a.start_time.slice(0, 5),
-                endTime: a.end_time.slice(0, 5),
-              })) ?? [])
-              setEditing(false)
+              cancelEditing()
             } else {
-              setEditing(true)
+              startEditing()
             }
           }}
           className="rounded-full border border-border px-4 py-2 text-sm text-fg-secondary hover:bg-surface-hover"

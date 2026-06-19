@@ -99,13 +99,14 @@ export function useWebSocket() {
       joinConversationRoom(activeConversationId)
     }
 
+    const timers = typingTimers.current
     return () => {
       unsubConnected()
       unsubMessage()
       unsubTyping()
       unsubPresence()
-      typingTimers.current.forEach((t) => clearTimeout(t))
-      typingTimers.current.clear()
+      timers.forEach((t) => clearTimeout(t))
+      timers.clear()
       socketManager.disconnect()
     }
   }, [isAuthenticated, addMessage, incrementUnread, updateContactStatus, activeConversationId])

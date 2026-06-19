@@ -2,11 +2,46 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import type { TestResult } from '@/types'
 
+interface RawTestResult {
+  id: number
+  userId?: number
+  user_id?: number
+  testType?: string
+  test_type?: string
+  score: number
+  severity: string
+  result: string
+  answers: number[]
+  createdAt?: string
+  created_at?: string
+}
+
+interface RawQuestion {
+  id?: number
+  questionText?: string
+  question_text?: string
+  options: { label: string; value: number }[]
+  orderIndex?: number
+  order_index?: number
+}
+
+interface RawTemplate {
+  id: number
+  title?: string
+  name?: string
+  description?: string
+  createdBy?: number
+  created_by?: number
+  questions?: RawQuestion[]
+  createdAt?: string
+  created_at?: string
+}
+
 export function useTestHistory() {
   return useQuery({
     queryKey: ['tests'],
     queryFn: async () => {
-      const res = await api.get('tests').json<{ success: boolean; data: any[] }>()
+      const res = await api.get('tests').json<{ success: boolean; data: RawTestResult[] }>()
       return { tests: (res.data ?? []).map(toTestResult) }
     },
     staleTime: 0,
@@ -18,22 +53,22 @@ export function useTestHistory() {
 export function useSaveTest() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: { test_type: string; score: number; severity: string; result: string; answers: number[] }) =>
+    mutationFn: (data: { testType: string; score: number; severity: string; result: string; answers: number[] }) =>
       api.post('tests', { json: data }).json(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tests'] }),
   })
 }
 
-function toTestResult(e: any): TestResult {
+function toTestResult(e: RawTestResult): TestResult {
   return {
     id: e.id,
-    user_id: e.userId ?? e.user_id,
-    test_type: e.testType ?? e.test_type,
+    user_id: e.userId ?? e.user_id!,
+    test_type: e.testType ?? e.test_type!,
     score: e.score,
     severity: e.severity,
     result: e.result,
     answers: e.answers ?? [],
-    created_at: e.createdAt ?? e.created_at,
+    created_at: e.createdAt ?? e.created_at!,
   }
 }
 
@@ -50,23 +85,23 @@ export function useTestTemplates() {
   return useQuery({
     queryKey: ['test-templates'],
     queryFn: async () => {
-      const res = await api.get('test-templates').json<{ success: boolean; data: any[] }>()
+      const res = await api.get('test-templates').json<{ success: boolean; data: RawTemplate[] }>()
       return (res.data ?? []).map(toTemplate)
     },
     staleTime: 30_000,
   })
 }
 
-function toTemplate(e: any): TestTemplate {
+function toTemplate(e: RawTemplate): TestTemplate {
   return {
     id: e.id,
-    title: e.title ?? e.name,
+    title: e.title ?? e.name ?? '',
     description: e.description ?? '',
     createdBy: e.createdBy ?? e.created_by ?? 0,
-    questions: (e.questions ?? []).map((q: any) => ({
+    questions: (e.questions ?? []).map((q: RawQuestion) => ({
       id: q.id,
       questionText: q.questionText ?? q.question_text ?? '',
-      options: (q.options ?? []).map((o: any) => ({ label: o.label, value: o.value })),
+      options: (q.options ?? []).map((o: { label: string; value: number }) => ({ label: o.label, value: o.value })),
       orderIndex: q.orderIndex ?? q.order_index ?? 0,
     })),
     createdAt: e.createdAt ?? e.created_at ?? '',

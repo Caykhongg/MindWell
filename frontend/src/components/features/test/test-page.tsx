@@ -8,6 +8,7 @@ import { TestResultView } from './test-result'
 import { TestHistory } from './test-history'
 import { TestManagement } from './test-management'
 import type { TestType, SeverityLevel } from '@/types'
+import type { TestTemplate } from '@/hooks/use-tests'
 
 type View = 'select' | 'intro' | 'quiz' | 'result' | 'history'
 
@@ -21,7 +22,7 @@ function findSeverity(test: TestType, score: number): SeverityLevel {
   return sorted[sorted.length - 1]
 }
 
-function templateToTestType(t: any): TestType {
+function templateToTestType(t: TestTemplate): TestType {
   const defaultOptions = t.questions[0]?.options ?? TEST_OPTIONS
   const maxScore = t.questions.length * (defaultOptions[defaultOptions.length - 1]?.value ?? 3)
   const qtr = Math.floor(maxScore / 4)
@@ -30,7 +31,7 @@ function templateToTestType(t: any): TestType {
     name: t.title,
     description: t.description,
     time: `${t.questions.length} câu`,
-    questions: t.questions.map((q: any) => q.questionText),
+    questions: t.questions.map(q => q.questionText),
     options: defaultOptions,
     severityLevels: [
       { min: 0, max: qtr, label: 'Bình thường', description: 'Kết quả bình thường.', recommendation: 'Duy trì thói quen lành mạnh.', color: '#7BA38B' },
@@ -108,12 +109,13 @@ export function TestPage() {
     setView('result')
 
     if (isAuthenticated) {
+      const answerValues = answers.map((a) => (a !== undefined ? selectedTest.options[a].value : 0))
       saveMutation.mutate({
-        test_type: selectedTest.id,
+        testType: selectedTest.id,
         score: total,
         severity: sev.label,
         result: sev.description,
-        answers: answers as number[],
+        answers: answerValues,
       })
     }
   }, [selectedTest, answers, isAuthenticated, saveMutation])
