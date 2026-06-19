@@ -21,7 +21,28 @@ let server: Server;
 const connections = new Set<Socket>();
 let shuttingDown = false;
 
+async function waitForDb(attempts = 15, interval = 2000) {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const sql = postgres(config.database.url, { max: 1, connect_timeout: 5 });
+      await sql`SELECT 1`;
+      await sql.end();
+      return true;
+    } catch {
+      logger.warn(`DB chưa sẵn sàng (lần ${i}/${attempts}), thử lại sau ${interval}ms...`);
+      await new Promise(r => setTimeout(r, interval));
+    }
+  }
+  return false;
+}
+
 async function runMigrations() {
+  const dbReady = await waitForDb();
+  if (!dbReady) {
+    logger.error('Không thể kết nối database sau nhiều lần thử. Kiểm tra DATABASE_URL');
+    return;
+  }
+
   try {
     const sql = postgres(config.database.url, { max: 1 });
     const db = drizzle(sql);
@@ -83,7 +104,13 @@ async function runMigrations() {
 
 runMigrations().then(() => {
   server = app.listen(config.port, () => {
-    logger.info(`MindWell API running on port ${config.port} [${config.nodeEnv}]`);
+    logger.info({
+      port: config.port,
+      env: config.nodeEnv,
+      db: config.database.url ? 'set' : 'missing',
+      jwtAccess: config.jwt.accessSecret.length > 20 ? 'custom' : 'default',
+      corsOrigin: config.cors.origin,
+    }, 'MindWell API started');
   });
 
   server.on('connection', (socket: Socket) => {
