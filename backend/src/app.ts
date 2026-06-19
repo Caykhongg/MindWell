@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import routes from './routes/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
@@ -12,6 +13,11 @@ import { logger } from './utils/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+const hasFrontend = fs.existsSync(path.join(frontendDist, 'index.html'));
+
+if (!hasFrontend) {
+  logger.warn({ path: frontendDist }, 'Frontend dist not found — API only mode');
+}
 
 const app = express();
 
@@ -32,11 +38,21 @@ app.use((req, _res, next) => {
 
 app.use(routes);
 
-app.use(express.static(frontendDist));
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(frontendDist, 'index.html'));
-});
+if (hasFrontend) {
+  app.use(express.static(frontendDist));
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.status(503).json({
+      success: false,
+      error: { code: 'FRONTEND_NOT_BUILT', message: 'Frontend chưa được build. Liên hệ admin.' },
+    });
+  });
+}
 
 app.use(errorHandler);
 
