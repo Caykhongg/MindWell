@@ -59,13 +59,20 @@ export function useSaveTest() {
   })
 }
 
+const SEVERITY_MAP: Record<string, string> = {
+  normal: 'Bình thường',
+  mild: 'Nhẹ',
+  moderate: 'Vừa',
+  severe: 'Nặng',
+}
+
 function toTestResult(e: RawTestResult): TestResult {
   return {
     id: e.id,
     user_id: e.userId ?? e.user_id!,
     test_type: e.testType ?? e.test_type!,
     score: e.score,
-    severity: e.severity,
+    severity: e.severity ?? SEVERITY_MAP[e.result?.toLowerCase()] ?? e.result,
     result: e.result,
     answers: e.answers ?? [],
     created_at: e.createdAt ?? e.created_at!,
