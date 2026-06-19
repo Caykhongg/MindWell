@@ -80,20 +80,19 @@ export function TestManagement() {
 
   const addOption = (qIdx: number) => {
     const qs = [...questions]
-    const lastValue = qs[qIdx].options.length > 0 ? qs[qIdx].options[qs[qIdx].options.length - 1].value : -1
-    qs[qIdx].options = [...qs[qIdx].options, { label: '', value: lastValue + 1 }]
+    qs[qIdx].options = [...qs[qIdx].options, { label: '', value: 0 }]
     setQuestions(qs)
   }
 
-  const updateOption = (qIdx: number, oIdx: number, value: string) => {
+  const updateOptionField = (qIdx: number, oIdx: number, field: 'label' | 'value', val: string | number) => {
     const qs = [...questions]
-    qs[qIdx].options[oIdx] = { ...qs[qIdx].options[oIdx], label: value }
+    qs[qIdx].options[oIdx] = { ...qs[qIdx].options[oIdx], [field]: val }
     setQuestions(qs)
   }
 
   const removeOption = (qIdx: number, oIdx: number) => {
     const qs = [...questions]
-    qs[qIdx].options = qs[qIdx].options.filter((_, i) => i !== oIdx).map((opt, i) => ({ ...opt, value: i }))
+    qs[qIdx].options = qs[qIdx].options.filter((_, i) => i !== oIdx)
     setQuestions(qs)
   }
 
@@ -197,9 +196,14 @@ export function TestManagement() {
                       <div key={oi} className="flex items-center gap-2">
                         <span className="text-xs text-fg-tertiary w-4">{oi + 1}.</span>
                         <input
-                          type="text" value={opt.label} onChange={e => updateOption(qi, oi, e.target.value)}
+                          type="text" value={opt.label} onChange={e => updateOptionField(qi, oi, 'label', e.target.value)}
                           className="flex-1 rounded-lg border border-border px-3 py-1.5 text-sm text-fg-primary focus:outline-none focus:ring-2 focus:ring-accent-sage"
                           placeholder={`Lựa chọn ${oi + 1}`} required
+                        />
+                        <input
+                          type="number" value={opt.value} onChange={e => updateOptionField(qi, oi, 'value', Number(e.target.value))}
+                          className="w-16 rounded-lg border border-border px-2 py-1.5 text-sm text-fg-primary text-center focus:outline-none focus:ring-2 focus:ring-accent-sage"
+                          placeholder="0" min="0" max="99"
                         />
                         {q.options.length > 2 && (
                           <button type="button" onClick={() => removeOption(qi, oi)} className="text-fg-tertiary text-xs p-1">✕</button>
