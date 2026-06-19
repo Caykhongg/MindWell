@@ -1,4 +1,5 @@
 import type { TestType, SeverityLevel } from '@/types'
+import { TEST_OPTIONS } from './test-data'
 
 interface AnswerDetail {
   questionIndex: number
@@ -67,16 +68,20 @@ export function TestResultView({
   onHistory,
   onBackToList,
 }: TestResultProps) {
-  const maxScore = test.questions.length * (test.options[test.options.length - 1]?.value ?? 3)
+  const maxScore = test.questions.reduce((sum, q) => {
+    const opts = q.options ?? test.options ?? TEST_OPTIONS
+    return sum + (opts[opts.length - 1]?.value ?? 3)
+  }, 0)
 
   const details: AnswerDetail[] = rawAnswers
     ? test.questions.map((q, i) => {
         const val = rawAnswers[i]
-        const found = test.options.find(o => o.value === val)
+        const opts = q.options ?? test.options ?? TEST_OPTIONS
+        const found = opts.find(o => o.value === val)
         const selectedLabel = found?.label ?? (val !== undefined ? `Điểm ${val}` : 'Chưa trả lời')
         return {
           questionIndex: i,
-          questionText: q,
+          questionText: q.text,
           selectedLabel,
           selectedValue: found?.value ?? val ?? 0,
         }

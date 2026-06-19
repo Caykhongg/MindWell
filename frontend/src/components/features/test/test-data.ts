@@ -1,4 +1,4 @@
-import type { TestType } from '@/types'
+import type { TestType, TestQuestion } from '@/types'
 
 export const TEST_OPTIONS = [
   { label: 'Không bao giờ', value: 0 },
@@ -7,6 +7,10 @@ export const TEST_OPTIONS = [
   { label: 'Hầu như mỗi ngày', value: 3 },
 ]
 
+function q(text: string): TestQuestion {
+  return { text, options: TEST_OPTIONS }
+}
+
 export const TEST_TYPES: TestType[] = [
   {
     id: 'phq9',
@@ -14,15 +18,15 @@ export const TEST_TYPES: TestType[] = [
     description: 'Đánh giá mức độ trầm cảm dựa trên 9 triệu chứng trong 2 tuần qua.',
     time: '5-10 phút',
     questions: [
-      'Thiếu quan tâm hoặc thích thú trong làm việc?',
-      'Cảm thấy buồn bã, chán nản hoặc tuyệt vọng?',
-      'Khó ngủ, thức giấc giữa đêm hoặc ngủ quá nhiều?',
-      'Cảm thấy mệt mỏi hoặc thiếu năng lượng?',
-      'Ăn không ngon hoặc ăn quá nhiều?',
-      'Cảm thấy không tốt về bản thân — hoặc đã thất vọng?',
-      'Khó tập trung khi đọc báo hoặc xem tivi?',
-      'Di chuyển hoặc nói chậm đến mức người khác nhận thấy? Hoặc ngược lại — bồn chồn, sốt ruột?',
-      'Nghĩ rằng mình nên chết đi, hoặc nghĩ đến việc tự làm đau mình?',
+      q('Thiếu quan tâm hoặc thích thú trong làm việc?'),
+      q('Cảm thấy buồn bã, chán nản hoặc tuyệt vọng?'),
+      q('Khó ngủ, thức giấc giữa đêm hoặc ngủ quá nhiều?'),
+      q('Cảm thấy mệt mỏi hoặc thiếu năng lượng?'),
+      q('Ăn không ngon hoặc ăn quá nhiều?'),
+      q('Cảm thấy không tốt về bản thân — hoặc đã thất vọng?'),
+      q('Khó tập trung khi đọc báo hoặc xem tivi?'),
+      q('Di chuyển hoặc nói chậm đến mức người khác nhận thấy? Hoặc ngược lại — bồn chồn, sốt ruột?'),
+      q('Nghĩ rằng mình nên chết đi, hoặc nghĩ đến việc tự làm đau mình?'),
     ],
     options: TEST_OPTIONS,
     severityLevels: [
@@ -38,13 +42,13 @@ export const TEST_TYPES: TestType[] = [
     description: 'Đánh giá mức độ lo âu dựa trên 7 triệu chứng trong 2 tuần qua.',
     time: '3-5 phút',
     questions: [
-      'Cảm thấy hồi hộp, lo lắng hoặc căng thẳng?',
-      'Không thể ngừng hoặc kiểm soát sự lo lắng?',
-      'Lo lắng quá nhiều về nhiều việc khác nhau?',
-      'Khó thư giãn?',
-      'Bồn chồn đến mức khó ngồi yên?',
-      'Trở nên dễ cáu kỉnh hoặc khó chịu?',
-      'Cảm thấy sợ hãi như thể điều tồi tệ sắp xảy ra?',
+      q('Cảm thấy hồi hộp, lo lắng hoặc căng thẳng?'),
+      q('Không thể ngừng hoặc kiểm soát sự lo lắng?'),
+      q('Lo lắng quá nhiều về nhiều việc khác nhau?'),
+      q('Khó thư giãn?'),
+      q('Bồn chồn đến mức khó ngồi yên?'),
+      q('Trở nên dễ cáu kỉnh hoặc khó chịu?'),
+      q('Cảm thấy sợ hãi như thể điều tồi tệ sắp xảy ra?'),
     ],
     options: TEST_OPTIONS,
     severityLevels: [

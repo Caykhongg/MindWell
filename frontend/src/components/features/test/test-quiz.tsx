@@ -23,10 +23,12 @@ export function TestQuiz({
   onFinish,
   total,
 }: TestQuizProps) {
+  const currentOptions = test.questions[step]?.options ?? test.options ?? []
+
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
       const key = parseInt(e.key)
-      if (key >= 1 && key <= 4 && key - 1 < test.options.length) {
+      if (key >= 1 && key <= 4 && key - 1 < currentOptions.length) {
         e.preventDefault()
         onAnswer(key - 1)
       }
@@ -39,7 +41,7 @@ export function TestQuiz({
         }
       }
     },
-    [onAnswer, onNext, onFinish, step, total, test.options.length],
+    [onAnswer, onNext, onFinish, step, total, currentOptions.length],
   )
 
   useEffect(() => {
@@ -59,11 +61,11 @@ export function TestQuiz({
         </p>
 
         <h3 className="text-lg font-serif text-fg-primary leading-relaxed">
-          {test.questions[step]}
+          {test.questions[step].text}
         </h3>
 
         <div className="space-y-2" role="radiogroup" aria-label="Chọn câu trả lời">
-          {test.options.map((opt, idx) => {
+          {test.questions[step].options.map((opt, idx) => {
             const isSelected = answers[step] === idx
             return (
               <button

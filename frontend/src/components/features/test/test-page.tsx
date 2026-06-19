@@ -14,25 +14,33 @@ type View = 'select' | 'intro' | 'quiz' | 'result' | 'history'
 
 function findSeverity(test: TestType, score: number): SeverityLevel {
   const sorted = [...test.severityLevels].sort((a, b) => a.min - b.min)
+  const last = sorted[sorted.length - 1]
+  if (score > last.max) return last
   for (const level of sorted) {
     if (score >= level.min && score <= level.max) {
       return level
     }
   }
-  return sorted[sorted.length - 1]
+  return last
 }
 
 function templateToTestType(t: TestTemplate): TestType {
-  const defaultOptions = t.questions[0]?.options ?? TEST_OPTIONS
-  const maxScore = t.questions.length * (defaultOptions[defaultOptions.length - 1]?.value ?? 3)
+  const firstOptions = t.questions[0]?.options ?? TEST_OPTIONS
+  const maxScore = t.questions.reduce((sum, q) => {
+    const opts = q.options ?? firstOptions
+    return sum + (opts[opts.length - 1]?.value ?? 3)
+  }, 0)
   const qtr = Math.floor(maxScore / 4)
   return {
     id: `template_${t.id}`,
     name: t.title,
     description: t.description,
     time: `${t.questions.length} câu`,
-    questions: t.questions.map(q => q.questionText),
-    options: defaultOptions,
+    questions: t.questions.map(q => ({
+      text: q.questionText,
+      options: q.options ?? firstOptions,
+    })),
+    options: firstOptions,
     severityLevels: [
       { min: 0, max: qtr, label: 'Bình thường', description: 'Kết quả bình thường.', recommendation: 'Duy trì thói quen lành mạnh.', color: '#7BA38B' },
       { min: qtr + 1, max: qtr * 2, label: 'Nhẹ', description: 'Kết quả nhẹ.', recommendation: 'Theo dõi và nghỉ ngơi nhiều hơn.', color: '#C9A97C' },
@@ -101,7 +109,11 @@ export function TestPage() {
 
   const handleFinish = useCallback(() => {
     if (!selectedTest) return
-    const answerValues = answers.map((a) => (a !== undefined ? selectedTest.options[a].value : 0))
+    const answerValues = answers.map((a, qi) => {
+      if (a === undefined) return 0
+      const opts = selectedTest.questions[qi]?.options ?? selectedTest.options ?? TEST_OPTIONS
+      return opts[a]?.value ?? 0
+    })
     const total = answerValues.reduce((s, v) => s + v, 0)
     const sev = findSeverity(selectedTest, total)
     setScore(total)

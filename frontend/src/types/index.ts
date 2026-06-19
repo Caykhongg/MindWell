@@ -33,13 +33,18 @@ export interface TestResult {
   created_at: string
 }
 
+export interface TestQuestion {
+  text: string
+  options: TestOption[]
+}
+
 export interface TestType {
   id: string
   name: string
   description: string
   time: string
-  questions: string[]
-  options: TestOption[]
+  questions: TestQuestion[]
+  options?: TestOption[]
   severityLevels: SeverityLevel[]
 }
 
