@@ -1,9 +1,17 @@
 import type { TestType, SeverityLevel } from '@/types'
 
+interface AnswerDetail {
+  questionIndex: number
+  questionText: string
+  selectedLabel: string
+  selectedValue: number
+}
+
 interface TestResultProps {
   test: TestType
   score: number
   severity: SeverityLevel
+  answers?: number[]
   onRetake: () => void
   onHistory: () => void
   onBackToList: () => void
@@ -54,11 +62,26 @@ export function TestResultView({
   test,
   score,
   severity,
+  answers: rawAnswers,
   onRetake,
   onHistory,
   onBackToList,
 }: TestResultProps) {
-  const maxScore = test.questions.length * 3
+  const maxScore = test.questions.length * (test.options[test.options.length - 1]?.value ?? 3)
+
+  const details: AnswerDetail[] = rawAnswers
+    ? test.questions.map((q, i) => {
+        const val = rawAnswers[i]
+        const found = test.options.find(o => o.value === val)
+        const selectedLabel = found?.label ?? (val !== undefined ? `Điểm ${val}` : 'Chưa trả lời')
+        return {
+          questionIndex: i,
+          questionText: q,
+          selectedLabel,
+          selectedValue: found?.value ?? val ?? 0,
+        }
+      })
+    : []
 
   return (
     <div className="animate-fade-in space-y-8" role="status" aria-live="polite">
@@ -85,6 +108,22 @@ export function TestResultView({
           </div>
         </div>
       </div>
+
+      {details.length > 0 && (
+        <div className="rounded-lg bg-surface border border-border divide-y divide-border">
+          <h3 className="font-medium text-fg-primary text-sm px-5 py-3">Chi tiết câu trả lời</h3>
+          {details.map(d => (
+            <div key={d.questionIndex} className="px-5 py-3 space-y-1">
+              <p className="text-xs text-fg-tertiary">Câu {d.questionIndex + 1}</p>
+              <p className="text-sm text-fg-primary">{d.questionText}</p>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-sm font-medium text-accent-sage">{d.selectedLabel}</span>
+                <span className="text-xs text-fg-tertiary">(+{d.selectedValue}đ)</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="rounded-lg bg-surface border border-border p-5 space-y-3">
         <h3 className="font-medium text-fg-primary text-sm">Đánh giá</h3>

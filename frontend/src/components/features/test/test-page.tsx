@@ -61,6 +61,7 @@ export function TestPage() {
   const [answers, setAnswers] = useState<(number | undefined)[]>([])
   const [score, setScore] = useState(0)
   const [severity, setSeverity] = useState<SeverityLevel | null>(null)
+  const [resultAnswers, setResultAnswers] = useState<number[]>([])
 
   const handleSelectTest = useCallback((test: TestType) => {
     setSelectedTest(test)
@@ -68,6 +69,7 @@ export function TestPage() {
     setAnswers([])
     setScore(0)
     setSeverity(null)
+    setResultAnswers([])
     setView('intro')
   }, [])
 
@@ -99,17 +101,15 @@ export function TestPage() {
 
   const handleFinish = useCallback(() => {
     if (!selectedTest) return
-    const total: number = answers.reduce(
-      (sum: number, a) => sum + (a !== undefined ? selectedTest.options[a].value : 0),
-      0,
-    )
+    const answerValues = answers.map((a) => (a !== undefined ? selectedTest.options[a].value : 0))
+    const total = answerValues.reduce((s, v) => s + v, 0)
     const sev = findSeverity(selectedTest, total)
     setScore(total)
     setSeverity(sev)
+    setResultAnswers(answerValues)
     setView('result')
 
     if (isAuthenticated) {
-      const answerValues = answers.map((a) => (a !== undefined ? selectedTest.options[a].value : 0))
       saveMutation.mutate({
         testType: selectedTest.id,
         score: total,
@@ -166,6 +166,7 @@ export function TestPage() {
             test={selectedTest}
             score={score}
             severity={severity}
+            answers={resultAnswers}
             onRetake={handleRetake}
             onHistory={handleViewHistory}
             onBackToList={handleBackToList}
@@ -182,6 +183,7 @@ export function TestPage() {
                 setSelectedTest(test)
                 setScore(testResult.score)
                 setSeverity(findSeverity(test, testResult.score))
+                setResultAnswers(testResult.answers ?? [])
                 setView('result')
               }
             }}
