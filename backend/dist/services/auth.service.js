@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { config } from '../config/index.js';
+import { sendEmail } from './email.service.js';
 import { UnauthorizedError, ConflictError, NotFoundError } from '../utils/errors.js';
 export class AuthService {
     userRepo;
@@ -111,6 +112,13 @@ export class AuthService {
             passwordResetToken: resetToken,
             passwordResetExpires: resetExpires,
         });
+        const resetUrl = `${config.cors.origin}/reset-password/${resetToken}`;
+        await sendEmail(email, 'Đặt lại mật khẩu MindWell', `<h2>Xin chào ${user.name},</h2>
+<p>Bạn đã yêu cầu đặt lại mật khẩu.</p>
+<p>Nhấp vào link dưới đây để đặt lại mật khẩu (hiệu lực 1 giờ):</p>
+<a href="${resetUrl}">${resetUrl}</a>
+<p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+<p>Trân trọng,<br/>Đội ngũ MindWell</p>`);
     }
     async resetPassword(token, newPassword) {
         const user = await this.userRepo.findByResetToken(token);

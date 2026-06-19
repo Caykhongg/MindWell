@@ -34,7 +34,14 @@ async function main() {
         role: 'patient',
         isActive: true,
     }).returning();
-    console.log('Created users:', { admin: admin.id, therapist: therapist.id, patient: patient.id });
+    const [tuanh] = await db.insert(users).values({
+        name: 'Tuanh',
+        email: 'toita1234567@gmail.com',
+        passwordHash: passwordHash('Tuanh123!'),
+        role: 'admin',
+        isActive: true,
+    }).returning();
+    console.log('Created users:', { admin: admin.id, therapist: therapist.id, patient: patient.id, tuanh: tuanh.id });
     const botReplyData = [
         { keywords: 'buồn,chán,nản,chẳng muốn làm gì', reply: 'Mình hiểu cảm giác của bạn. Có chuyện gì đã xảy ra với bạn gần đây không? Mình luôn sẵn sàng lắng nghe.' },
         { keywords: 'lo lắng,hồi hộp,stress,căng thẳng', reply: 'Căng thẳng có thể ảnh hưởng rất nhiều đến sức khỏe. Hãy thử hít thở sâu: hít vào 4 giây, giữ 4 giây, thở ra 4 giây. Bạn có muốn chia sẻ thêm không?' },

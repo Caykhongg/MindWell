@@ -17,12 +17,12 @@ export declare const updateDiarySchema: z.ZodObject<{
     mood: z.ZodOptional<z.ZodEnum<["happy", "sad", "anxious", "calm", "stressed", "angry"]>>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    tags?: string[] | undefined;
     content?: string | undefined;
     mood?: "happy" | "sad" | "anxious" | "calm" | "stressed" | "angry" | undefined;
-    tags?: string[] | undefined;
 }, {
+    tags?: string[] | undefined;
     content?: string | undefined;
     mood?: "happy" | "sad" | "anxious" | "calm" | "stressed" | "angry" | undefined;
-    tags?: string[] | undefined;
 }>;
 //# sourceMappingURL=diary.schema.d.ts.map

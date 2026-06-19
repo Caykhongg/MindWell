@@ -52,13 +52,13 @@ export declare class ChatService {
         entries: import("../db/schema/conversations.js").Message[];
         hasMore: boolean;
     }>;
-    sendMessage(conversationId: number, senderId: number, text: string): Promise<{
+    sendMessage: (conversationId: number, senderId: number, text: string) => Promise<{
         id: number;
         createdAt: Date;
         isRead: number;
+        text: string;
         conversationId: number;
         senderId: number;
-        text: string;
     }>;
     markAsRead(conversationId: number, userId: number, messageIds: number[]): Promise<void>;
 }

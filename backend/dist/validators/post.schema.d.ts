@@ -33,14 +33,17 @@ export declare const updatePostSchema: z.ZodObject<{
 }>;
 export declare const createCommentSchema: z.ZodObject<{
     content: z.ZodString;
+    isAnonymous: z.ZodOptional<z.ZodBoolean>;
     guestName: z.ZodOptional<z.ZodString>;
     guestEmail: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     content: string;
+    isAnonymous?: boolean | undefined;
     guestName?: string | undefined;
     guestEmail?: string | undefined;
 }, {
     content: string;
+    isAnonymous?: boolean | undefined;
     guestName?: string | undefined;
     guestEmail?: string | undefined;
 }>;

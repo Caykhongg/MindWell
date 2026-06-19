@@ -18,13 +18,13 @@ export declare class ReportService {
         isResolved: boolean;
         createdAt: Date;
     }[]>;
-    resolve(id: number): Promise<{
+    resolve(id: number, action: 'delete' | 'dismiss'): Promise<{
         id: number;
         postId: number;
         reporterId: number;
         reason: string;
         isResolved: boolean;
         createdAt: Date;
-    }>;
+    } | null>;
 }
 //# sourceMappingURL=report.service.d.ts.map

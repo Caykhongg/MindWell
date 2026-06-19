@@ -3,7 +3,7 @@ export declare class BotService {
     private botReplyRepo;
     private feedbackRepo;
     constructor(botReplyRepo: BotReplyRepository, feedbackRepo: ChatFeedbackRepository);
-    chat(message: string, userId?: number): Promise<{
+    chat: (message: string, userId?: number) => Promise<{
         reply: string;
         isCrisis: boolean;
         matchedKeyword: string;

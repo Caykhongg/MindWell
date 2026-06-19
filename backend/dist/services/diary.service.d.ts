@@ -8,9 +8,9 @@ export declare class DiaryService {
             createdAt: Date;
             updatedAt: Date;
             userId: number;
+            tags: string | null;
             content: string;
             mood: string;
-            tags: string | null;
         }[];
         total: number;
     }>;
@@ -19,9 +19,9 @@ export declare class DiaryService {
         createdAt: Date;
         updatedAt: Date;
         userId: number;
+        tags: string | null;
         content: string;
         mood: string;
-        tags: string | null;
     }>;
     createEntry(userId: number, data: {
         content: string;
@@ -32,9 +32,9 @@ export declare class DiaryService {
         createdAt: Date;
         updatedAt: Date;
         userId: number;
+        tags: string | null;
         content: string;
         mood: string;
-        tags: string | null;
     }>;
     updateEntry(id: number, userId: number, data: Partial<{
         content: string;
@@ -45,9 +45,9 @@ export declare class DiaryService {
         createdAt: Date;
         updatedAt: Date;
         userId: number;
+        tags: string | null;
         content: string;
         mood: string;
-        tags: string | null;
     }>;
     deleteEntry(id: number, userId: number): Promise<void>;
 }

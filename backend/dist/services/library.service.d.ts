@@ -39,8 +39,8 @@ export declare class LibraryService {
         updatedAt: Date;
         status: string;
         title: string;
-        content: string;
         tags: string | null;
+        content: string;
         authorId: number;
         category: string;
     }>;

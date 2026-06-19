@@ -1,4 +1,4 @@
-import { eq, like } from 'drizzle-orm';
+import { eq, like, or } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { botReplies, chatFeedback, } from '../db/schema/bot-replies.js';
 export class BotReplyRepository {
@@ -10,6 +10,15 @@ export class BotReplyRepository {
             .select()
             .from(botReplies)
             .where(like(botReplies.keywords, `%${keyword}%`))
+            .orderBy(botReplies.createdAt);
+    }
+    async findByKeywords(keywords) {
+        if (keywords.length === 0)
+            return [];
+        return db
+            .select()
+            .from(botReplies)
+            .where(or(...keywords.map(k => like(botReplies.keywords, `%${k}%`))))
             .orderBy(botReplies.createdAt);
     }
     async create(data) {

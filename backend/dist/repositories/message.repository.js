@@ -1,4 +1,4 @@
-import { eq, desc, lt, and, sql } from 'drizzle-orm';
+import { eq, ne, desc, lt, and, sql } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { messages, } from '../db/schema/conversations.js';
 export class MessageRepository {
@@ -29,7 +29,7 @@ export class MessageRepository {
         const [result] = await db
             .select({ count: sql `count(*)` })
             .from(messages)
-            .where(and(eq(messages.conversationId, conversationId), eq(messages.isRead, 0), eq(messages.senderId, userId)));
+            .where(and(eq(messages.conversationId, conversationId), eq(messages.isRead, 0), ne(messages.senderId, userId)));
         return Number(result?.count || 0);
     }
 }

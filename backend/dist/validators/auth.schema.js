@@ -19,7 +19,6 @@ export const forgotPasswordSchema = z.object({
     email: z.string().email('Email không hợp lệ'),
 });
 export const resetPasswordSchema = z.object({
-    token: z.string().min(1, 'Token là bắt buộc'),
     password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự').max(255),
 });
 //# sourceMappingURL=auth.schema.js.map

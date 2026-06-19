@@ -2,6 +2,7 @@ import { type BotReply, type NewBotReply, type NewChatFeedback } from '../db/sch
 export declare class BotReplyRepository {
     findAll(): Promise<BotReply[]>;
     findByKeyword(keyword: string): Promise<BotReply[]>;
+    findByKeywords(keywords: string[]): Promise<BotReply[]>;
     create(data: NewBotReply): Promise<BotReply>;
     update(id: number, data: Partial<NewBotReply>): Promise<BotReply | undefined>;
     delete(id: number): Promise<BotReply | undefined>;

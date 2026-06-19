@@ -13,7 +13,8 @@ export function reportController(reportService) {
         }),
         resolve: asyncHandler(async (req, res) => {
             const id = parseInt(req.params.id, 10);
-            const result = await reportService.resolve(id);
+            const { action } = req.body;
+            const result = await reportService.resolve(id, action || 'dismiss');
             res.json(success(result));
         }),
     };

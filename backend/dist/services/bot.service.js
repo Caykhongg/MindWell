@@ -1,5 +1,6 @@
 import { NotFoundError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
+import { trace } from '../utils/tracing.js';
 const CRISIS_KEYWORDS = [
     'tự tử', 'tự sát', 'khủng hoảng', 'muốn chết',
     'kết thúc cuộc đời', 'đau khổ quá', 'không muốn sống nữa',
@@ -22,7 +23,7 @@ export class BotService {
         this.botReplyRepo = botReplyRepo;
         this.feedbackRepo = feedbackRepo;
     }
-    async chat(message, userId) {
+    chat = trace(async (message, userId) => {
         const lowerMsg = message.toLowerCase();
         for (const keyword of CRISIS_KEYWORDS) {
             if (lowerMsg.includes(keyword)) {
@@ -30,23 +31,18 @@ export class BotService {
                 return { reply: CRISIS_RESPONSE, isCrisis: true, matchedKeyword: keyword };
             }
         }
-        const words = lowerMsg.split(/\s+/);
-        const matchedReplies = [];
-        for (const word of words) {
-            if (word.length < 2)
-                continue;
-            const results = await this.botReplyRepo.findByKeyword(word);
-            for (const r of results) {
-                matchedReplies.push({ reply: r.reply, keyword: word });
+        const words = lowerMsg.split(/\s+/).filter(w => w.length >= 2);
+        if (words.length > 0) {
+            const results = await this.botReplyRepo.findByKeywords(words);
+            const matchedReplies = results.flatMap(r => ({ reply: r.reply, keyword: r.keywords }));
+            if (matchedReplies.length > 0) {
+                const selected = matchedReplies[Math.floor(Math.random() * matchedReplies.length)];
+                return { reply: selected.reply, isCrisis: false, matchedKeyword: selected.keyword };
             }
-        }
-        if (matchedReplies.length > 0) {
-            const selected = matchedReplies[Math.floor(Math.random() * matchedReplies.length)];
-            return { reply: selected.reply, isCrisis: false, matchedKeyword: selected.keyword };
         }
         const fallback = DEFAULT_REPLIES[Math.floor(Math.random() * DEFAULT_REPLIES.length)];
         return { reply: fallback, isCrisis: false };
-    }
+    }, { name: 'BotService.chat' });
     async submitFeedback(data, userId) {
         const result = await this.feedbackRepo.create({
             messageText: data.messageText,

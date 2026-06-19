@@ -1,4 +1,4 @@
-import { eq, desc, count } from 'drizzle-orm';
+import { eq, and, desc, count } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { notifications } from '../db/schema/notifications.js';
 export class NotificationService {
@@ -18,7 +18,7 @@ export class NotificationService {
         await db
             .update(notifications)
             .set({ isRead: true })
-            .where(eq(notifications.id, id));
+            .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
     }
     async markAllRead(userId) {
         await db
@@ -30,7 +30,7 @@ export class NotificationService {
         const result = await db
             .select({ count: count() })
             .from(notifications)
-            .where(eq(notifications.isRead, false));
+            .where(and(eq(notifications.isRead, false), eq(notifications.userId, userId)));
         return Number(result[0]?.count ?? 0);
     }
 }

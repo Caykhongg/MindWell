@@ -6,6 +6,8 @@ import { initWebSocketServer, closeWebSocketServer } from './websocket/index.js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { users } from './db/schema/users.js';
 import { posts, comments } from './db/schema/posts.js';
@@ -14,6 +16,7 @@ import type { Server } from 'http';
 import type { Socket } from 'net';
 import * as readline from 'node:readline';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let server: Server;
 const connections = new Set<Socket>();
 let shuttingDown = false;
@@ -23,7 +26,7 @@ async function runMigrations() {
     const sql = postgres(config.database.url, { max: 1 });
     const db = drizzle(sql);
     logger.info('Running database migrations...');
-    await migrate(db, { migrationsFolder: 'src/db/migrations' });
+    await migrate(db, { migrationsFolder: path.resolve(__dirname, 'db/migrations') });
     logger.info('Database migrations complete');
 
     const existing = await db.select().from(users).where(eq(users.email, 'admin@mindwell.com')).limit(1);

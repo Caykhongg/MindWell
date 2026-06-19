@@ -1,4 +1,4 @@
-import { eq, desc, count, and } from 'drizzle-orm';
+import { eq, desc, count, and, ne } from 'drizzle-orm';
 import { db } from '../config/database.js';
 import { appointments, } from '../db/schema/appointments.js';
 export class AppointmentRepository {
@@ -44,7 +44,7 @@ export class AppointmentRepository {
         const result = await db
             .select()
             .from(appointments)
-            .where(and(eq(appointments.userId, userId), eq(appointments.date, date), eq(appointments.status, 'pending')))
+            .where(and(eq(appointments.userId, userId), eq(appointments.date, date), ne(appointments.status, 'cancelled')))
             .limit(1);
         return result[0];
     }

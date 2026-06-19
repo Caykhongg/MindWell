@@ -1,18 +1,12 @@
 import { z } from 'zod';
-export declare const submitTestSchema: z.ZodEffects<z.ZodObject<{
+export declare const submitTestSchema: z.ZodObject<{
     answers: z.ZodArray<z.ZodNumber, "many">;
-    testType: z.ZodEnum<["phq9", "gad7", "general"]>;
+    testType: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     answers: number[];
-    testType: "phq9" | "gad7" | "general";
+    testType: string;
 }, {
     answers: number[];
-    testType: "phq9" | "gad7" | "general";
-}>, {
-    answers: number[];
-    testType: "phq9" | "gad7" | "general";
-}, {
-    answers: number[];
-    testType: "phq9" | "gad7" | "general";
+    testType: string;
 }>;
 //# sourceMappingURL=test.schema.d.ts.map
