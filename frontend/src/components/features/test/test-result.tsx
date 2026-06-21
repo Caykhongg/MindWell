@@ -14,7 +14,7 @@ interface TestResultProps {
   severity: SeverityLevel
   answers?: number[]
   onRetake: () => void
-  onHistory: () => void
+  onHistory?: () => void
   onBackToList: () => void
 }
 
@@ -154,13 +154,15 @@ export function TestResultView({
         >
           Làm lại bài này
         </button>
-        <button
-          type="button"
-          onClick={onHistory}
-          className="rounded-full border border-border text-fg-secondary font-medium py-2.5 px-6 text-sm transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-sage focus-visible:ring-offset-2"
-        >
-          Xem lịch sử
-        </button>
+        {onHistory && (
+          <button
+            type="button"
+            onClick={onHistory}
+            className="rounded-full border border-border text-fg-secondary font-medium py-2.5 px-6 text-sm transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-sage focus-visible:ring-offset-2"
+          >
+            Xem lịch sử
+          </button>
+        )}
         <button
           type="button"
           onClick={onBackToList}

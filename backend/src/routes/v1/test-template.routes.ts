@@ -12,8 +12,8 @@ const repo = new TestTemplateRepository();
 const service = new TestTemplateService(repo);
 const controller = testTemplateController(service);
 
-router.get('/', authenticate, controller.list);
-router.get('/:id', authenticate, controller.getById);
+router.get('/', controller.list);
+router.get('/:id', controller.getById);
 router.post('/', authenticate, requireRole('admin', 'therapist'), validate(createTestTemplateSchema), controller.create);
 router.put('/:id', authenticate, requireRole('admin', 'therapist'), validate(updateTestTemplateSchema), controller.update);
 router.delete('/:id', authenticate, requireRole('admin', 'therapist'), controller.delete);

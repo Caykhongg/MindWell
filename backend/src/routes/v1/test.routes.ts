@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { TestService } from '../../services/test.service.js';
 import { TestRepository } from '../../repositories/test.repository.js';
 import { testController } from '../../controllers/test.controller.js';
-import { authenticate } from '../../middleware/auth.middleware.js';
+import { authenticate, optionalAuth } from '../../middleware/auth.middleware.js';
 import { validate } from '../../middleware/validate.middleware.js';
 import { submitTestSchema } from '../../validators/test.schema.js';
 
@@ -14,6 +14,6 @@ const controller = testController(service);
 
 router.get('/', authenticate, controller.list);
 router.get('/:id', authenticate, controller.getById);
-router.post('/', authenticate, validate(submitTestSchema), controller.create);
+router.post('/', optionalAuth, validate(submitTestSchema), controller.create);
 
 export default router;

@@ -31,6 +31,7 @@ export class TestService {
   constructor(private testRepo: TestRepository) {}
 
   async getEntries(userId: number, page: number, limit: number) {
+    if (userId == null) return { entries: [], total: 0 };
     const { entries, total } = await this.testRepo.findByUserId(userId, page, limit);
     const data = entries.map((e) => ({ ...e, answers: JSON.parse(e.answers) }));
     return { entries: data, total };
@@ -47,7 +48,7 @@ export class TestService {
     return { ...entry, answers: JSON.parse(entry.answers) };
   }
 
-  async createEntry(userId: number, data: { answers: number[]; testType: string }) {
+  async createEntry(userId: number | null, data: { answers: number[]; testType: string }) {
     const { score, result } = calculateScore(data.testType, data.answers);
 
     const entry = await this.testRepo.create({

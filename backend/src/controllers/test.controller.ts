@@ -21,7 +21,7 @@ export function testController(testService: TestService) {
 
     create: asyncHandler(async (req: AuthRequest, res: Response) => {
       const { answers, testType } = req.body;
-      const entry = await testService.createEntry(req.userId!, { answers, testType });
+      const entry = await testService.createEntry(req.userId ?? null, { answers, testType });
       res.status(201).json(success(entry));
     }),
   };

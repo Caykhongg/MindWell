@@ -3,7 +3,7 @@ import { users } from './users.js';
 
 export const mentalTests = pgTable('mental_tests', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: integer('user_id'),
   score: integer('score').notNull(),
   result: varchar('result', { length: 100 }).notNull(),
   answers: text('answers').notNull(),

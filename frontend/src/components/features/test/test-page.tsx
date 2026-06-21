@@ -148,8 +148,9 @@ export function TestPage() {
   }, [])
 
   const handleViewHistory = useCallback(() => {
+    if (!isAuthenticated) return
     setView('history')
-  }, [])
+  }, [isAuthenticated])
 
   const renderView = () => {
     switch (view) {
@@ -180,7 +181,7 @@ export function TestPage() {
             severity={severity}
             answers={resultAnswers}
             onRetake={handleRetake}
-            onHistory={handleViewHistory}
+            onHistory={isAuthenticated ? handleViewHistory : undefined}
             onBackToList={handleBackToList}
           />
         ) : null

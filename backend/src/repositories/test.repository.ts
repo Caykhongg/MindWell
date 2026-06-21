@@ -24,7 +24,12 @@ export class TestRepository {
   }
 
   async create(data: NewMentalTest): Promise<MentalTest> {
-    const result = await db.insert(mentalTests).values(data).returning();
-    return result[0];
+    const { answers, score, result, testType } = data;
+    const insertData: any = { answers, score, result, testType };
+    if (data.userId != null) {
+      insertData.userId = data.userId;
+    }
+    const result_ = await db.insert(mentalTests).values(insertData).returning();
+    return result_[0];
   }
 }
