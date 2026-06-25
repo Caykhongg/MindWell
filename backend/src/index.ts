@@ -102,23 +102,25 @@ async function runMigrations() {
   }
 }
 
-runMigrations().then(() => {
-  server = app.listen(config.port, () => {
-    logger.info({
-      port: config.port,
-      env: config.nodeEnv,
-      db: config.database.url ? 'set' : 'missing',
-      jwtAccess: config.jwt.accessSecret.length > 20 ? 'custom' : 'default',
-      corsOrigin: config.cors.origin,
-    }, 'MindWell API started');
-  });
+server = app.listen(config.port, () => {
+  logger.info({
+    port: config.port,
+    env: config.nodeEnv,
+    db: config.database.url ? 'set' : 'missing',
+    jwtAccess: config.jwt.accessSecret.length > 20 ? 'custom' : 'default',
+    corsOrigin: config.cors.origin,
+  }, 'MindWell API started');
+});
 
-  server.on('connection', (socket: Socket) => {
-    connections.add(socket);
-    socket.on('close', () => connections.delete(socket));
-  });
+server.on('connection', (socket: Socket) => {
+  connections.add(socket);
+  socket.on('close', () => connections.delete(socket));
+});
 
-  initWebSocketServer(server);
+initWebSocketServer(server);
+
+runMigrations().catch((err) => {
+  logger.error({ err }, 'Migration failed');
 });
 
 function shutdown(signal: string) {
